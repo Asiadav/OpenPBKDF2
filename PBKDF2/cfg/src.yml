@@ -1,0 +1,13 @@
+# List of all Verilog source files to include in this build.
+# Used by both synthesis and RTL simulation.
+synthesis.inputs.input_files: [
+  "v/bsg_cgol_cell.v",
+   # TODO: Add any additional BSG files needed
+   "${bsg_root}/bsg_misc/bsg_popcount.v",
+]
+synthesis.inputs.input_files_meta: [append, subst]
+
+# Add synthesis input files to simulation inputs
+# (Only for RTL sim)
+sim.inputs.input_files: synthesis.inputs.input_files
+sim.inputs.input_files_meta: [crossref, subst]

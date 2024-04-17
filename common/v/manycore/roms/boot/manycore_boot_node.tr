@@ -1,0 +1,32 @@
+#######################################################################################################
+#
+# format:   <4 bit op> <fsb packet>
+#   op = 0000: wait one cycle
+#   op = 0001: send
+#   op = 0010: receive & check
+#   op = 0011: done; disable but do not stop
+#   op = 0100: finish; stop simulation
+#   op = 0101: wait for cycle ctr to reach 0
+#   op = 0110: set cycle ctr
+#
+# fsb packet (data)
+# 1 bit    75 bits
+#   0       data
+#
+# fsb packet (control)
+# 1 bit    7 bits    4 bits   64 bits
+#   1      opcode    srcid    data
+#
+# opcodes
+#   1: 0000_001 = disable
+#   2: 0000_010 = enable
+#   5: 0000_101 = assert reset
+#   6: 0000_110 = deassert reset
+#
+
+
+
+#done:  indicated done, when all trace-replays are done, the
+#       simulation will finish.
+0011____0__0000000__0000__00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000
+
