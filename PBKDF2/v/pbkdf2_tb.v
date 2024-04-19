@@ -67,7 +67,7 @@ module bsg_cgol_cell_tb;
       ,.data_o( rom_data_lo )
       );
 
-  bsg_cgol_cell DUT
+  pbkdf2_chunk DUT
     (.clk_i        (           clk )
 
     ,.data_i       (       data_li )
