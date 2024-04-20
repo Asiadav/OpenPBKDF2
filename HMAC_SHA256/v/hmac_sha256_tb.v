@@ -1,10 +1,10 @@
-// bsg_cgol_cell_tb.v
+// hmac_sha256_tb.v
 //
 // This file contains the toplevel testbench for testing
 // this design. 
 //
 
-module bsg_cgol_cell_tb;
+module hmac_sha256_tb;
 
   /* Dump Test Waveform To VPD File */
   initial begin
@@ -67,16 +67,16 @@ module bsg_cgol_cell_tb;
       ,.data_o( rom_data_lo )
       );
 
-  bsg_cgol_cell DUT
-    (.clk_i        (           clk )
+//   bsg_cgol_cell DUT
+//     (.clk_i        (           clk )
 
-    ,.data_i       (       data_li )
-    ,.en_i         (         en_li )
-    ,.update_i     (     update_li )
-    ,.update_val_i ( update_val_li )
+//     ,.data_i       (       data_li )
+//     ,.en_i         (         en_li )
+//     ,.update_i     (     update_li )
+//     ,.update_val_i ( update_val_li )
 
-    ,.data_o       (   dut_data_lo )
-    );
+//     ,.data_o       (   dut_data_lo )
+//     );
 
   // input handshake for DUT, it can consume new data in each cycle
   assign en_li = tr_v_lo & tr_data_lo[9];

@@ -17,7 +17,7 @@ module hmac_sha256 (
     ,input v_i
   );
   
-    logic in_valid, inready, out_valid, out_ready, sel;
+    logic in_valid, in_ready, out_valid, out_ready, sel;
     logic [2:0] ps, ns;
     logic [255:0] pad, out;
     logic [511:0] in;
@@ -52,23 +52,21 @@ module hmac_sha256 (
 	    out_ready = 1;
 	    v_o = 1;
 	end
-	default:  // unused
+	default:  begin end// unused
     endcase
     end
 
     always @(posedge clk_i) begin
         if (rst_i) begin
-	    ps <= 0;
-	    in <= 0;
-	    prf_o <= 0;
-	end else
-	    ps <= ns;
-	    if (ps == 1) in <= {pad ^ salt_i, prf_i}; // update the sha256 input register
-	    if (ps == 3) in <= {pad ^ salt_i, out}; // update the sha256 input register
-	    if (ps == 5) prf_o <= out; // update the output register
-	end
-
-
+            ps <= 0;
+            in <= 0;
+            prf_o <= 0;
+        end else begin
+            ps <= ns;
+            if (ps == 1) in <= {pad ^ salt_i, prf_i}; // update the sha256 input register
+            if (ps == 3) in <= {pad ^ salt_i, out}; // update the sha256 input register
+            if (ps == 5) prf_o <= out; // update the output register
+        end
     end
 endmodule
 
