@@ -11,7 +11,18 @@ def make_trace_for(input: str) -> [str]:
 
     sha256 = hashlib.new("sha256")
 
-    send_line: str = "0001__"
+    reset_line = "0010__1"
+    unreset_line = "0010__0"
+    for i in range(0, 64):
+        reset_line += "_00000000"
+        unreset_line += "_00000000"
+
+    lines.append(f"# Reset SHA256")
+    lines.append(reset_line)
+    lines.append(unreset_line)
+    lines.append("")
+
+    send_line: str = "0001__0_"
     chunk_bytes: bytes = input.encode()
 
     for i in range(0, len(input)):
@@ -36,7 +47,7 @@ def make_trace_for(input: str) -> [str]:
     sha256.update(input.encode())
     digest = sha256.hexdigest()
 
-    read_line = "0010_"
+    read_line = "0010__0"
     for i in range(0, 32):
         read_line += "_00000000"
 
@@ -47,11 +58,14 @@ def make_trace_for(input: str) -> [str]:
     lines.append("")
     lines.append(f"# Receive `{digest}`")
     lines.append(read_line)
+    lines.append("\n")
 
     return lines
 
 
 if __name__ == "__main__":
-    lines: [str] = make_trace_for("123456789012345678901234567890123456780123456789012345")
+    lines: [str] = []
+    lines += make_trace_for("")
+    lines += make_trace_for("123456789012345678901234567890123456780123456789012345")
 
     print("\n".join(lines))

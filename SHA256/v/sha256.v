@@ -39,6 +39,7 @@ module sha256 (
   
     ,input logic in_valid
     ,input [511:0] in
+    ,input logic new_hash
     ,output logic in_ready
 
     ,output logic out_valid
@@ -46,14 +47,14 @@ module sha256 (
     ,input logic out_ready);
   
 
-    localparam H0_INITAL = 32'h6a09e667;
-	localparam H1_INITAL = 32'hbb67ae85;
-	localparam H2_INITAL = 32'h3c6ef372;
-	localparam H3_INITAL = 32'ha54ff53a;
-	localparam H4_INITAL = 32'h510e527f;
-	localparam H5_INITAL = 32'h9b05688c;
-	localparam H6_INITAL = 32'h1f83d9ab;
-	localparam H7_INITAL = 32'h5be0cd19;
+    localparam H0_INITIAL = 32'h6a09e667;
+	localparam H1_INITIAL = 32'hbb67ae85;
+	localparam H2_INITIAL = 32'h3c6ef372;
+	localparam H3_INITIAL = 32'ha54ff53a;
+	localparam H4_INITIAL = 32'h510e527f;
+	localparam H5_INITIAL = 32'h9b05688c;
+	localparam H6_INITIAL = 32'h1f83d9ab;
+	localparam H7_INITIAL = 32'h5be0cd19;
 	logic [31:0] K [0:63] = '{
 		32'h428a2f98, 32'h71374491, 32'hb5c0fbcf, 32'he9b5dba5,
 		32'h3956c25b, 32'h59f111f1, 32'h923f82a4, 32'hab1c5ed5,
@@ -72,38 +73,55 @@ module sha256 (
 		32'h748f82ee, 32'h78a5636f, 32'h84c87814, 32'h8cc70208,
 		32'h90befffa, 32'ha4506ceb, 32'hbef9a3f7, 32'hc67178f2};
 
-    enum {WAITING, RUNNING, FINISHED} state, next_state;
+    enum {WAITING, RUNNING, FINISHED} state;
 
 	logic [0:31] H [0: 7], H_next [0: 7]; // 8 H values
 	logic [0:31] W_history [0:15], W, W_next; // 64 W values
     logic [6:0] cycle; // 0 - 64; 0-63 are message scheduling, 1-64 are compression
 
     logic [511: 0] saved_in;
+    logic saved_new;
 
 	always_ff @(posedge clk_i) begin
 		if (rst_i) begin
             in_ready <= 0;
             out_valid <= 0;
+            state <= WAITING;
 
-			H[0] <= H0_INITAL;
-			H[1] <= H1_INITAL;
-			H[2] <= H2_INITAL;
-			H[3] <= H3_INITAL;
-			H[4] <= H4_INITAL;
-			H[5] <= H5_INITAL;
-			H[6] <= H6_INITAL;
-			H[7] <= H7_INITAL;
+			H[0] <= H0_INITIAL;
+			H[1] <= H1_INITIAL;
+			H[2] <= H2_INITIAL;
+			H[3] <= H3_INITIAL;
+			H[4] <= H4_INITIAL;
+			H[5] <= H5_INITIAL;
+			H[6] <= H6_INITIAL;
+			H[7] <= H7_INITIAL;
 		end else begin
+            // $display("state: %d", state);
 			if (state == WAITING) begin
                 in_ready <= 1;
                 if (in_valid) begin
                     saved_in <= in;
+                    saved_new <= new_hash;
+
+                    if (new_hash) begin
+                        H[0] <= H0_INITIAL;
+                        H[1] <= H1_INITIAL;
+                        H[2] <= H2_INITIAL;
+                        H[3] <= H3_INITIAL;
+                        H[4] <= H4_INITIAL;
+                        H[5] <= H5_INITIAL;
+                        H[6] <= H6_INITIAL;
+                        H[7] <= H7_INITIAL;
+                    end
+
                     state <= RUNNING;
                 end
             end else if (state == RUNNING) begin
                 in_ready <= 0;
                 if (cycle == 64) begin
                     out <= {H_next[0], H_next[1], H_next[2], H_next[3], H_next[4], H_next[5], H_next[6], H_next[7]};
+                    
                     H <= H_next;
                     out_valid <= 1;
                     state <= FINISHED;
@@ -115,9 +133,9 @@ module sha256 (
                 W_history[1:15] <= W_history[0:14];
                 W_history[0] <= W_next;
                 W <= W_next;
-                // $display("w%d %32b", cycle[5:0], W_next);
 
             end else if (state == FINISHED) begin
+                $display("Out: %64h", out);
                 if (out_ready == 1) begin
                     out_valid <= 0;
                     state <= WAITING;
@@ -137,25 +155,25 @@ module sha256 (
 
 	always_ff @(posedge clk_i) begin
 		if (rst_i) begin
-			a <= H0_INITAL;
-			b <= H1_INITAL;
-			c <= H2_INITAL;
-			d <= H3_INITAL;
-			e <= H4_INITAL;
-			f <= H5_INITAL;
-			g <= H6_INITAL;
-			h <= H7_INITAL;
+			a <= H0_INITIAL;
+			b <= H1_INITIAL;
+			c <= H2_INITIAL;
+			d <= H3_INITIAL;
+			e <= H4_INITIAL;
+			f <= H5_INITIAL;
+			g <= H6_INITIAL;
+			h <= H7_INITIAL;
 		end else begin
 			if (state == RUNNING) begin
 				if (cycle == 0) begin
-					a <= H[0];
-					b <= H[1];
-					c <= H[2];
-					d <= H[3];
-					e <= H[4];
-					f <= H[5];
-					g <= H[6];
-					h <= H[7];
+					a <= saved_new ? H0_INITIAL : H[0];
+					b <= saved_new ? H1_INITIAL : H[1];
+					c <= saved_new ? H2_INITIAL : H[2];
+					d <= saved_new ? H3_INITIAL : H[3];
+					e <= saved_new ? H4_INITIAL : H[4];
+					f <= saved_new ? H5_INITIAL : H[5];
+					g <= saved_new ? H6_INITIAL : H[6];
+					h <= saved_new ? H7_INITIAL : H[7];
 				end else begin
 					a <= a_next;
 					b <= b_next;

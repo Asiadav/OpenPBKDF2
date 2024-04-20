@@ -26,20 +26,20 @@ module sha256_tb;
 
 
   logic dut_v_lo, dut_v_r;
-  logic [511:0] dut_data_lo, dut_data_r;
-  assign dut_data_lo[511:256] = 256'b0;
+  logic [512:0] dut_data_lo, dut_data_r;
+  assign dut_data_lo[512:256] = 257'b0;
   logic dut_ready_lo, dut_ready_r;
 
   logic tr_v_lo;
-  logic [511:0] tr_data_lo;
+  logic [512:0] tr_data_lo;
   logic tr_ready_lo, tr_ready_r;
 
   logic [31:0] rom_addr_li;
-  logic [515:0] rom_data_lo;
+  logic [516:0] rom_data_lo;
 
-  logic tr_yumi_li, dut_yumi_li;;
+  logic tr_yumi_li, dut_yumi_li;
 
-  bsg_fsb_node_trace_replay #(.ring_width_p(512)
+  bsg_fsb_node_trace_replay #(.ring_width_p(513)
                              ,.rom_addr_width_p(32) )
     trace_replay
       ( .clk_i ( ~clk ) // Trace Replay should run on negative clock edge!
@@ -68,7 +68,7 @@ module sha256_tb;
         dut_data_r  <= dut_data_lo;
     end
 
-    trace_rom #(.width_p(4 + 512),.addr_width_p(32))
+    trace_rom #(.width_p(4 + 513),.addr_width_p(32))
     ROM
         (.addr_i( rom_addr_li )
         ,.data_o( rom_data_lo )
@@ -79,7 +79,8 @@ module sha256_tb;
         ,.rst_i(reset)  
     
         ,.in_valid(tr_v_lo)
-        ,.in(tr_data_lo)   
+        ,.new_hash(tr_data_lo[512])
+        ,.in(tr_data_lo[511:0])   
         ,.in_ready( dut_ready_lo )
 
         ,.out_valid(dut_v_lo)
