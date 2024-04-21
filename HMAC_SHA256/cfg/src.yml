@@ -3,8 +3,6 @@
 synthesis.inputs.input_files: [
   "v/hmac_sha256.v",
   "../SHA256/v/sha256.v",
-   # TODO: Add any additional BSG files needed
-   "${bsg_root}/bsg_misc/bsg_popcount.v",
 ]
 synthesis.inputs.input_files_meta: [append, subst]
 

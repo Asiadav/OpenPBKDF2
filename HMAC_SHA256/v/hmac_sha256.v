@@ -3,28 +3,29 @@
 **/
 
 module hmac_sha256 (
-     input clk_i
-    ,input rst_i 
+     input logic clk_i
+    ,input logic rst_i 
         
-    ,input [255:0] prf_i
-    ,input [255:0] salt_i
+    ,input logic [255:0] prf_i
+    ,input logic [255:0] salt_i
     
     ,output logic [255:0] prf_o
     
-    ,output v_o
-    ,output r_o
-    ,input r_i
-    ,input v_i
+    ,output logic v_o
+    ,output logic r_o
+    ,input logic r_i
+    ,input logic v_i
   );
   
-    logic in_valid, in_ready, out_valid, out_ready, sel;
+    logic new_hash, in_valid, in_ready, out_valid, out_ready, sel;
     logic [2:0] ps, ns;
     logic [255:0] pad, out;
     logic [511:0] in;
 
     assign pad = ps == 1 ? {16{16'h5c}} : {16{16'h36}}; // select the padding
 
-    sha256 hasher (.clk_i, .rst_i, .in_valid, .in, .in_ready, .out_valid, .out, .out_ready);
+    assign new_hash = 1;
+    sha256 hasher (.clk_i, .rst_i, .in_valid, .new_hash, .in, .in_ready, .out_valid, .out, .out_ready);
 
     always @(*) begin
     ns = ps; r_o = 0; out_ready = 0; in_valid = 0; v_o = 0;

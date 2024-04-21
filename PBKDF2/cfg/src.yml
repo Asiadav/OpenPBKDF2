@@ -1,9 +1,9 @@
 # List of all Verilog source files to include in this build.
 # Used by both synthesis and RTL simulation.
 synthesis.inputs.input_files: [
-  "v/bsg_cgol_cell.v",
-   # TODO: Add any additional BSG files needed
-   "${bsg_root}/bsg_misc/bsg_popcount.v",
+  "v/pbkdf2.v",
+  "../HMAC_SHA256/v/hmac_sha256"
+  "../SHA256/v/sha256"
 ]
 synthesis.inputs.input_files_meta: [append, subst]
 
