@@ -38,7 +38,7 @@ module hmac_sha256_tb;
 
   logic tr_yumi_li, dut_yumi_li;
 
-  bsg_fsb_node_trace_replay #(.ring_width_p(513)
+  bsg_fsb_node_trace_replay #(.ring_width_p(512)
                              ,.rom_addr_width_p(32) )
     trace_replay
       ( .clk_i ( ~clk ) // Trace Replay should run on negative clock edge!
