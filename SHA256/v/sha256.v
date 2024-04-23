@@ -32,7 +32,6 @@ function [31:0] message(input [31:0] sixteen, input [31:0] fifteen, input [31:0]
 	end
 endfunction
 
-
 module sha256 (
      input logic clk_i
     ,input logic rst_i  
