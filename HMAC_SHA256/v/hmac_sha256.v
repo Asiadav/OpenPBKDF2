@@ -65,7 +65,7 @@ module hmac_sha256 (
         end else begin
             ps <= ns;
             if (ps == 1) in <= {pad ^ salt_i, prf_i}; // update the sha256 input register
-            if (ps == 3) in <= {pad ^ salt_i, out}; // update the sha256 input register
+            if (ps == 3) in <= {pad ^ salt_i, out, 8'b10000000, 56'b0, 64'd96}; // update the sha256 input register
             if (ps == 5) prf_o <= out; // update the output register
         end
     end

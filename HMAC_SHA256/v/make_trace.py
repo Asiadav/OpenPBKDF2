@@ -25,13 +25,15 @@ def make_trace_for(key: str, message: str) -> [str]:
 
     hash_sum_1 = hashlib.sha256(i_key_pad + message_bytes)
 
+    print(f"# hash_sum_1 input: {(message_bytes + i_key_pad).hex()}")
     print(f"# hash_sum_1: {hash_sum_1.digest().hex()}")
 
     hash_sum_2 = hashlib.sha256(o_key_pad + hash_sum_1.digest())
+    # print(f"Length of hash_2 input: {len(o_key_pad + hash_sum_1.digest())}")
 
     print(f"# reimpl: {hash_sum_2.hexdigest()}")
 
-    print(f"# correct: {correct}")
+    # print(f"# correct: {correct}")
     assert hash_sum_2.hexdigest() == correct
     # end reimpl
 
@@ -39,36 +41,36 @@ def make_trace_for(key: str, message: str) -> [str]:
     # create traces
     lines: [str] = []
 
-    send_line: str = "0001__0_"
+    send_line: str = "0001__"
 
-    if (len(message) < 64):
-        message_bytes = b"\x00" * (64 - len(message_bytes)) + message_bytes
-        
-    chunk_bytes = message_bytes + key_bytes
-    print(len(chunk_bytes))
-    print(chunk_bytes)
+    if (len(message) > 23):
+        print("Message is too long to send!")
 
-    for i in range(0, len(chunk_bytes)):
-        send_line += format(chunk_bytes[i], "08b") + "_"
-    
+    for c in message:
+        send_line += format(int(ord(c)), "08b") + "_"
     send_line += "10000000_"
+    send_line += "00000000_" * (23 - len(message) + 6)
+    length: str = format((len(message) + 32) * 8, "012b")
+    send_line += f"00000{length[0:3]}_{length[4:]}_"
+
+    if (len(key) > 32):
+        print("Key is too long to send!")
+
+    for c in key:
+        send_line += format(int(ord(c)), "08b") + "_"
     
-    for _ in range(len(chunk_bytes) + 1, 56):
-        send_line += "00000000_"
+    send_line += "00000000_" * (32 - len(key))
 
-    for _ in range(6):
-        send_line += "00000000_"
+    # send_line += "10000000_"
+    # send_line += "00000000_" * (24 - len(key) + 6)
+    # length: str = format(len(key) * 8, "09b")
+    # send_line += f"0000000{length[0]}_{length[1:]}"
 
-    length: str = format(len(chunk_bytes) * 8, "09b")
-
-    send_line += f"0000000{length[0]}_{length[1:]}"
-
-    lines.append(f"# Send pass:  `{message}` salt: `{key}`")
+    lines.append(f"# Send pass:  `{message}`")
     lines.append(f"#      salt:  `{key}`")
-    lines.append(f"#      hex: `{(message_bytes+key_bytes).hex()}`")
     lines.append(send_line)
 
-    read_line = "0010__0"
+    read_line = "0010_" + ("_00000000" * 32)
 
     for i in range(0, 64, 2):
         byte = correct[i:i+2]
@@ -84,7 +86,7 @@ def make_trace_for(key: str, message: str) -> [str]:
 
 if __name__ == "__main__":
     lines: [str] = []
-    lines += make_trace_for("max key is 64 bytes", "Max password length is 64 bytes")
+    lines += make_trace_for("max key is 64 bytes", "dummy_message_2_ten_chr")
     # lines += make_trace_for("123456789012345678901234567890123456780123456789012345")
 
     print("\n".join(lines))
