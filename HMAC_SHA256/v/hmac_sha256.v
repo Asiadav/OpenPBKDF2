@@ -7,8 +7,8 @@ module hmac_sha256 (
      input logic clk_i
     ,input logic rst_i 
         
-    ,input logic [439:0] key_i   // left aligned such that the key has all 0's on the right to fill the input
-    ,input logic [511:0] msg_i   // left aligned such that the msg has all 0's on the right to fill the input
+    ,input logic [511:0] key_i   // left aligned - the key has all 0's on the right to fill the input
+    ,input logic [439:0] msg_i   // left aligned - the msg has all 0's on the right to fill the input
     ,input logic [4:0] msg_len_i
     
     ,output logic [255:0] prf_o
@@ -26,9 +26,7 @@ module hmac_sha256 (
 
     assign pad = ps == 1 ? {32{16'h5c}} : {32{16'h36}}; // select the padding
 
-    assign new_hash = 1;
-    // TODO: update with new 1024 bit input hashing module
-    //sha256_auto_padder_1024_bit_in hasher (.clk_i, .rst_i, .in_valid, .in_length({1,msg_len_i}) .new_hash, .in, .in_ready, .out_valid, .out, .out_ready);
+    sha256_1024bit hasher (.clk_i, .rst_i, .in_valid, .in, .in_ready, .out_valid, .out, .out_ready);
 
     always @(*) begin
     ns = ps; r_o = 0; out_ready = 0; in_valid = 0; v_o = 0;

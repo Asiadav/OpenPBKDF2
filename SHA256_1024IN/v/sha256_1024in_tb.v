@@ -1,10 +1,10 @@
-// hmac_sha256_tb.v
+// sha256_1024in_tb.v
 //
 // This file contains the toplevel testbench for testing
 // this design. 
 //
 
-module hmac_sha256_tb;
+module sha256_1024in_tb;
 
   /* Dump Test Waveform To VPD File */
   initial begin
@@ -25,20 +25,20 @@ module hmac_sha256_tb;
       );
 
   logic dut_v_lo, dut_v_r;
-  logic [512:0] dut_data_lo, dut_data_r;
-  assign dut_data_lo[512:256] = 257'b0;
+  logic [1028:0] dut_data_lo, dut_data_r;
+  assign dut_data_lo[1028:256] = 773'b0;
   logic dut_ready_lo, dut_ready_r;
 
   logic tr_v_lo;
-  logic [512:0] tr_data_lo;
+  logic [1028:0] tr_data_lo;
   logic tr_ready_lo, tr_ready_r;
 
   logic [31:0] rom_addr_li;
-  logic [516:0] rom_data_lo;
+  logic [1032:0] rom_data_lo;
 
   logic tr_yumi_li, dut_yumi_li;
 
-  bsg_fsb_node_trace_replay #(.ring_width_p(512)
+  bsg_fsb_node_trace_replay #(.ring_width_p(1029)
                              ,.rom_addr_width_p(32) )
     trace_replay
       ( .clk_i ( ~clk ) // Trace Replay should run on negative clock edge!
@@ -60,7 +60,7 @@ module hmac_sha256_tb;
       , .error_o()
       );
 
-  trace_rom #(.width_p(516),.addr_width_p(32))
+  trace_rom #(.width_p(4 + 5 + 1024),.addr_width_p(32))
     ROM
       (.addr_i( rom_addr_li )
       ,.data_o( rom_data_lo )
@@ -77,15 +77,15 @@ module hmac_sha256_tb;
 	 .clk_i(clk)
 	,.rst_i(reset)
 	
-	,.key_i(tr_data_lo[511:256])  // password
-	,.msg_i(tr_data_lo[255:0])    // salt
+	,.in(tr_data_lo[1023:0])  // password
+	,.msg_len_i(tr_data_lo[1028:1024])    // salt
 
-	,.prf_o(dut_data_lo[255:0])
+	,.out(dut_data_lo[255:0])
 
-	,.v_o(dut_v_lo)
-	,.r_o(dut_ready_lo)
-	,.v_i(tr_v_lo)
-	,.r_i(dut_yumi_li)
+	,.out_valid(dut_v_lo)
+	,.in_ready(dut_ready_lo)
+	,.in_valid(tr_v_lo)
+	,.out_ready(dut_yumi_li)
 	);
 
   

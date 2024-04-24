@@ -1,0 +1,29 @@
+# Main hammer config file
+
+# Set top levels
+synthesis.inputs.top_module: "hmac_sha256"
+sim.inputs.tb_name: "hmac_sha256_tb"
+
+# Don't synthesize these gate-level netlist modules
+synthesis.inputs.preserve_modules: []
+
+# Custom SDC constraints
+vlsi.inputs:
+  # You can add SDC constraints directly here (list of strings)
+  custom_sdc_constraints: []
+  
+  # Additional SDC files to read
+  custom_sdc_files:
+    - "constraints.tcl"
+  custom_sdc_files_meta: prependlocal # Prepend path of this config file!
+
+# Placement Constraints
+vlsi.inputs.placement_constraints:
+  - path: "TOP" # (this name isn't actually checked...)
+    type: toplevel
+    # define chip dimensions
+    width:  200
+    height: 200
+    x: 0
+    y: 0
+    margins: {left: 0, right: 0, top: 0, bottom: 0}
