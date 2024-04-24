@@ -1,7 +1,7 @@
 # List of all Verilog source files to include in this build.
 # Used by both synthesis and RTL simulation.
 synthesis.inputs.input_files: [
-  "v/hmac_sha256.v",
+  "v/sha256_1024in.v",
   "../SHA256/v/sha256.v",
 ]
 synthesis.inputs.input_files_meta: [append, subst]

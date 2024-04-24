@@ -8,7 +8,7 @@ module sha256_1024in (
     ,input logic rst_i 
         
     ,input logic [1023:0] in 
-    ,input logic [4:0] msg_len_i
+    ,input logic [5:0] msg_len_i
     ,input logic in_valid
     ,output logic in_ready
     

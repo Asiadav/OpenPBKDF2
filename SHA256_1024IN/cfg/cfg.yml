@@ -1,8 +1,8 @@
 # Main hammer config file
 
 # Set top levels
-synthesis.inputs.top_module: "hmac_sha256"
-sim.inputs.tb_name: "hmac_sha256_tb"
+synthesis.inputs.top_module: "sha256_1024in"
+sim.inputs.tb_name: "sha256_1024in_tb"
 
 # Don't synthesize these gate-level netlist modules
 synthesis.inputs.preserve_modules: []

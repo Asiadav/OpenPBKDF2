@@ -65,9 +65,9 @@ module hmac_sha256 (
             prf_o <= 0;
         end else begin
             ps <= ns;
-            if (ps == 1) in <= {pad ^ key_i, msg_i}; // update the sha256 input register
-            if (ps == 3) in <= {pad ^ key_i, out}; // update the sha256 input register
-            if (ps == 5) prf_o <= out; // update the output register
+            if (ns == 1) in <= {pad ^ key_i, msg_i}; // update the sha256 input register
+            if (ns == 3) in <= {pad ^ key_i, out}; // update the sha256 input register
+            if (ns == 5) prf_o <= out; // update the output register
         end
     end
 endmodule
