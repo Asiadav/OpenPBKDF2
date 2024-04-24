@@ -27,8 +27,6 @@ def make_trace_for(key: str, message: str) -> [str]:
 
     send_line: str = "0001__"
 
-    send_line += format(len(message), "06b") + "_"
-
 
     for i in range(0, 128, 2):
         byte = i_key_pad.hex()[i:i+2]
@@ -38,13 +36,15 @@ def make_trace_for(key: str, message: str) -> [str]:
     for c in message:
         send_line += format(int(ord(c)), "08b") + "_"
     send_line += "10000000"
-    send_line += "_00000000" * (63 - len(message))
+    send_line += "_00000000" * (62 - len(message))
+
+    send_line += "_" + format(64+len(message), "08b")
 
     lines.append(f"# Send pass:  `{key}`")
     lines.append(f"#      salt:  `{message}`")
     lines.append(send_line)
 
-    read_line = "0010__000000" + ("_00000000" * 96)
+    read_line = "0010_" + ("_00000000" * 96)
 
     for i in range(0, 64, 2):
         byte = hash_sum[i:i+2]
