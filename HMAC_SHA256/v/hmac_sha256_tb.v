@@ -77,8 +77,8 @@ module hmac_sha256_tb;
 	 .clk_i(clk)
 	,.rst_i(reset)
 	
-	,.key_i(tr_data_lo[511:0])  // password
-	,.msg_i(tr_data_lo[1023:512])    // salt
+	,.key_i(tr_data_lo[1023:512])  // password
+	,.msg_i(tr_data_lo[511:0])    // salt
 	,.msg_len_i(tr_data_lo[1029:1024])
 
 	,.prf_o(dut_data_lo[255:0])
