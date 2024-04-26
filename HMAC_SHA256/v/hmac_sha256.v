@@ -24,7 +24,7 @@ module hmac_sha256 (
     logic [255:0] out;
     logic [439:0] one;
     logic [511:0] pad;
-    logic [1023:0] in, in_1, in_2;
+    logic [1023:0] in, in_1, in_2, key_reg;
 
     sha256_1024in hasher (.clk_i, .rst_i, .in_valid, .in, .in_ready, .out_valid, .out, .out_ready);
 
@@ -60,7 +60,7 @@ module hmac_sha256 (
 
     oneSetter2 setter (.len(msg_len_i), .one);
     assign in_1 = {{64{8'h36}} ^ key_i, msg_i} | {1'b1, msg_len_i, 3'b000} | {one, 64'b0};
-    assign in_2 = {{64{8'h5c}} ^ key_i, out, 1'b1, 191'b0, 64'd768};
+    assign in_2 = {{64{8'h5c}} ^ key_reg, out, 1'b1, 191'b0, 64'd768};
 
     always @(posedge clk_i) begin
         if (rst_i) begin
@@ -69,7 +69,7 @@ module hmac_sha256 (
             //prf_o <= 0;
         end else begin
             ps <= ns;
-            if (ns == 3'b001) in <= in_1 ; // update the sha256 input register
+            if (ns == 3'b001) begin in <= in_1; key_reg <= key_i; end // update the sha256 input register
             if (ns == 3'b011) in <= in_2; // update the sha256 input register
             if (ns == 3'b101) prf_o <= out; // update the output register
         end
