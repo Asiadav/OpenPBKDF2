@@ -35,6 +35,7 @@ module sha256_1024in (
     case (ps)
 	0: begin  // Read Input
 	    if (in_valid) ns = 1; // new data recieved
+	    $display("%h", in_reg);
 	end
 	1: begin  // Load First Chunk Into SHA256
 	    if (in_r) ns = 2;
