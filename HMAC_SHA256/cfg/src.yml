@@ -3,6 +3,7 @@
 synthesis.inputs.input_files: [
   "v/hmac_sha256.v",
   "../SHA256/v/sha256.v",
+  "../SHA256_1024IN/v/sha256_1024in.v",
 ]
 synthesis.inputs.input_files_meta: [append, subst]
 

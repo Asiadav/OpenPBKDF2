@@ -37,8 +37,6 @@ module sha256_1024in (
 	    if (in_valid) ns = 1; // new data recieved
 	end
 	1: begin  // Load First Chunk Into SHA256
-	    $display("loading first chunk");
-	    $display("%h", in_reg);
 	    if (in_r) ns = 2;
 	    in_v = 1;
 	    in_ready = 1;
@@ -48,7 +46,6 @@ module sha256_1024in (
 	    if (out_v) ns = 3;
 	end
 	3: begin  // Load Second Chunk Into SHA256
-	    $display("loading second chunk");
 	    if (in_r) ns = 4;
 	    in_v = 1;
 	    out_r = 1;
@@ -57,7 +54,6 @@ module sha256_1024in (
 	    if (out_v) ns = 5;
 	end
 	5: begin  // Output Result
-	    $display("outputing result");
 	    if (out_ready) ns = 0;
 	    out_valid = 1;
 	    out_r = 1;

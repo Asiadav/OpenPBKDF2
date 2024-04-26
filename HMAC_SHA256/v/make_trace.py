@@ -41,25 +41,26 @@ def make_trace_for(key: str, message: str) -> [str]:
     # create traces
     lines: [str] = []
 
-    send_line: str = "0001__"
+    send_line: str = "0001_"
 
-    if (len(message) > 23):
+    if (len(message) > 55):
         print("Message is too long to send!")
 
-    for c in message:
-        send_line += format(int(ord(c)), "08b") + "_"
-    send_line += "10000000_"
-    send_line += "00000000_" * (23 - len(message) + 6)
-    length: str = format((len(message) + 32) * 8, "012b")
-    send_line += f"00000{length[0:3]}_{length[4:]}_"
+    send_line += "_" + format(len(message), "06b")
 
-    if (len(key) > 32):
+    for c in message:
+        send_line += "_" + format(int(ord(c)), "08b")
+    send_line += "_10000000"
+    send_line += "_00000000" * (63 - len(message))
+
+
+    if (len(key) > 64):
         print("Key is too long to send!")
 
     for c in key:
-        send_line += format(int(ord(c)), "08b") + "_"
+        send_line += "_" + format(int(ord(c)), "08b")
     
-    send_line += "00000000_" * (32 - len(key))
+    send_line += "_00000000" * (64 - len(key))
 
     # send_line += "10000000_"
     # send_line += "00000000_" * (24 - len(key) + 6)
@@ -70,7 +71,7 @@ def make_trace_for(key: str, message: str) -> [str]:
     lines.append(f"#      salt:  `{key}`")
     lines.append(send_line)
 
-    read_line = "0010_" + ("_00000000" * 32)
+    read_line = "0010__000000" + ("_00000000" * 96)
 
     for i in range(0, 64, 2):
         byte = correct[i:i+2]

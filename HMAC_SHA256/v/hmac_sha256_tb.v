@@ -25,20 +25,20 @@ module hmac_sha256_tb;
       );
 
   logic dut_v_lo, dut_v_r;
-  logic [512:0] dut_data_lo, dut_data_r;
-  assign dut_data_lo[512:256] = 257'b0;
+  logic [1029:0] dut_data_lo, dut_data_r;
+  assign dut_data_lo[1029:256] = 768'b0;
   logic dut_ready_lo, dut_ready_r;
 
   logic tr_v_lo;
-  logic [512:0] tr_data_lo;
+  logic [1029:0] tr_data_lo;
   logic tr_ready_lo, tr_ready_r;
 
   logic [31:0] rom_addr_li;
-  logic [516:0] rom_data_lo;
+  logic [1033:0] rom_data_lo;
 
   logic tr_yumi_li, dut_yumi_li;
 
-  bsg_fsb_node_trace_replay #(.ring_width_p(512)
+  bsg_fsb_node_trace_replay #(.ring_width_p(1030)
                              ,.rom_addr_width_p(32) )
     trace_replay
       ( .clk_i ( ~clk ) // Trace Replay should run on negative clock edge!
@@ -60,7 +60,7 @@ module hmac_sha256_tb;
       , .error_o()
       );
 
-  trace_rom #(.width_p(516),.addr_width_p(32))
+  trace_rom #(.width_p(4+6+1024),.addr_width_p(32))
     ROM
       (.addr_i( rom_addr_li )
       ,.data_o( rom_data_lo )
@@ -77,8 +77,9 @@ module hmac_sha256_tb;
 	 .clk_i(clk)
 	,.rst_i(reset)
 	
-	,.key_i(tr_data_lo[511:256])  // password
-	,.msg_i(tr_data_lo[255:0])    // salt
+	,.key_i(tr_data_lo[511:0])  // password
+	,.msg_i(tr_data_lo[1023:512])    // salt
+	,.msg_len_i(tr_data_lo[1029:1024])
 
 	,.prf_o(dut_data_lo[255:0])
 
