@@ -35,7 +35,7 @@ def make_trace_for(password: str, salt: str, iters: int) -> [str]:
     send_line: str = "0001_"
 
     # append salt length
-    send_line += "_" + format(len(salt), "06b")
+    send_line += "_" + format(len(salt_bytes), "06b")
 
     # append iterations
     send_line += "_" + format(iters, "032b")
@@ -48,10 +48,9 @@ def make_trace_for(password: str, salt: str, iters: int) -> [str]:
 
     # append salt
 
-    for c in salt:
-        send_line += "_" + format(int(ord(c)), "08b")
-    send_line += "_10000000"
-    send_line += "_00000000" * (63 - len(salt))
+    for b in salt_bytes:
+        send_line += "_" + format(int(b), "08b")
+    send_line += "_00000000" * (64 - len(salt_bytes))
 
 
     lines.append(f"# Send pass:  `{password}`")
