@@ -3,39 +3,30 @@
 import hashlib
 import hmac
 
-bytes_36 = bytes((x ^ 0x36) for x in range(256))
-bytes_5C = bytes((x ^ 0x5C) for x in range(256))
+def make_trace_for(password: str, salt: str, iters: int) -> [str]:
 
-def make_trace_for(key: str, message: str) -> [str]:
-    # Known working hmac
-    correct = hmac.new(key.encode(), message.encode(), hashlib.sha256).hexdigest()
-    
-    # hmac reimpl to verify information
-    key_bytes = key.encode()
-    message_bytes = message.encode()
+    correct = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), iters).hex()
+    chunk = 1
+    # reimplimentation for debugging
+    salt_bytes = salt.encode() + chunk.to_bytes(4, "big")
+    pass_bytes = password.encode()
+    initial = hmac.new(pass_bytes, salt_bytes, hashlib.sha256).hexdigest()
+    print(f"# hmac 1: {initial}")
 
-    if (len(key) < 64):
-        key_bytes += b"\x00" * (64 - len(key_bytes))
+    prev = initial
+    out = initial
+    for i in range(iters-1):
+        new = hmac.new(pass_bytes, bytes.fromhex(prev), hashlib.sha256).hexdigest()
+        out = hex(int(out, 16) ^ int(new, 16))
+        prev = new
+        print(f"# hmac {i+2}: {new}")
+    out = out[2:]
 
-    i_key_pad = key_bytes.translate(bytes_36)
-    # print(f"# i_key_pad: {i_key_pad.hex()}")
+    print(f"# pbkdf2: {out}")
 
-    o_key_pad = key_bytes.translate(bytes_5C)
-    # print(f"# o_key_pad: {o_key_pad.hex()}")
-
-    hash_sum_1 = hashlib.sha256(i_key_pad + message_bytes)
-
-    # print(f"# hash_sum_1 input: {(i_key_pad+message_bytes).hex()}")
-    print(f"# first hash: {hash_sum_1.digest().hex()}")
-
-    hash_sum_2 = hashlib.sha256(o_key_pad + hash_sum_1.digest())
-    # print(f"Length of hash_2 input: {len(o_key_pad + hash_sum_1.digest())}")
-
-    print(f"# second hash: {hash_sum_2.hexdigest()}")
-
-    # print(f"# correct: {correct}")
-    assert hash_sum_2.hexdigest() == correct
+    assert out == correct
     # end reimpl
+
 
     
     # create traces
@@ -43,36 +34,32 @@ def make_trace_for(key: str, message: str) -> [str]:
 
     send_line: str = "0001_"
 
-    # append message length
-    send_line += "_" + format(len(message), "06b")
+    # append salt length
+    send_line += "_" + format(len(salt), "06b")
 
-    # append key
-    if (len(key) > 64):
-        print("Key is too long to send!")
+    # append iterations
+    send_line += "_" + format(iters, "032b")
 
-    for c in key:
+    # append password
+    for c in password:
         send_line += "_" + format(int(ord(c)), "08b")
     
-    send_line += "_00000000" * (64 - len(key))
+    send_line += "_00000000" * (64 - len(password))
 
-    # append message
-    if (len(message) > 55):
-        print("Message is too long to send!")
+    # append salt
 
-    for c in message:
+    for c in salt:
         send_line += "_" + format(int(ord(c)), "08b")
     send_line += "_10000000"
-    send_line += "_00000000" * (63 - len(message))
-
-    pad = "80" + (61-len(message)) * "00" + format(8*(64+len(message)), "04x")
+    send_line += "_00000000" * (63 - len(salt))
 
 
-    lines.append(f"# Send pass:  `{key}`")
-    lines.append(f"#      salt:  `{message}`")
-    lines.append(f"# sha256 in:  `{i_key_pad.hex()+message_bytes.hex()+pad}`")
+    lines.append(f"# Send pass:  `{password}`")
+    lines.append(f"#      salt:  `{salt}`")
+    lines.append(f"#      iter:  `{iters}'")
     lines.append(send_line)
 
-    read_line = "0010__000000" + ("_00000000" * 96)
+    read_line = "0010__000000_" + "0" * 32 + ("_00000000" * 96)
 
     for i in range(0, 64, 2):
         byte = correct[i:i+2]
@@ -88,6 +75,6 @@ def make_trace_for(key: str, message: str) -> [str]:
 
 if __name__ == "__main__":
     lines: [str] = []
-    lines += make_trace_for("key", "message")
+    lines += make_trace_for("password", "salt", 2)
 
     print("\n".join(lines))
