@@ -21,7 +21,7 @@ module pbkdf2(
     
     logic first_run, incr_count, rst_count;
 
-    logic prf_v_o, prf_r_i, prf_v_i, prf_v_o;
+    logic prf_v_o, prf_r_i, prf_v_i, prf_r_o;
     logic [1:0] ns, ps;
     logic [5:0] hash_len, salt_len, msg_len_i;
     logic [31:0] count, count_plus_one, iters;
