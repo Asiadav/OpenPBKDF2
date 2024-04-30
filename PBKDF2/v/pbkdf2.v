@@ -7,8 +7,8 @@ module pbkdf2(
     ,input rst_i
 
     ,input [31:0] iters_i
-    ,input [512:0] pass_i
-    ,input [512:0] salt_i
+    ,input [511:0] pass_i
+    ,input [511:0] salt_i
     ,input [5:0] salt_len_i
 
     ,output logic in_ready
@@ -19,14 +19,14 @@ module pbkdf2(
     ,output logic [255:0] hash_o
   );
     
-    logic first_run;
+    logic first_run, incr_count, rst_count;
 
     logic prf_v_o, prf_r_i, prf_v_i, prf_v_o;
     logic [1:0] ns, ps;
     logic [5:0] hash_len, salt_len, msg_len_i;
-    logic [31:0] count, new_count, count_plus_one, iters;
+    logic [31:0] count, count_plus_one, iters;
     logic [255:0] prf_o, prf_reg;
-    logic [511:0] pass, salt;
+    logic [511:0] pass, salt, msg_i;
 
 
     assign count_plus_one = count + 1;
@@ -35,12 +35,12 @@ module pbkdf2(
     assign hash_len = 6'b100000;  // 32 byte hash (256bit)
 
     // on the first iterations, salt and salt length
-    assign msg_i = first_run ? salt : prf_reg 
-    assign msg_len_i = first_run ? salt_len : hash_len
+    assign msg_i = first_run ? salt : {prf_reg, 256'b0};
+    assign msg_len_i = first_run ? salt_len : hash_len;
 
 
     // instantiate HMAC as the Pseudo Random Function (PRF)
-    HMAC_SHA256 prf (.clk_i,
+    hmac_sha256 prf (.clk_i,
 		     .rst_i,
 		     .key_i(pass),
 		     .msg_i,
@@ -49,16 +49,17 @@ module pbkdf2(
 		     .v_i(prf_v_i),
 		     .r_i(prf_r_i),
 		     .v_o(prf_v_o),
-		     .r_o(prf_r_o));.
+		     .r_o(prf_r_o));
 
     always @(*) begin
-	ns = ps; in_ready = 0; out_valid = 0; prf_v_i = 0; prf_r_i = 0; new_count = count;
+	ns = ps; in_ready = 0; out_valid = 0; prf_v_i = 0; prf_r_i = 0; incr_count = 0; rst_count = 0;
 	case(ps)
 	    0: begin  // Read Input
-		if (in_valid) begin ns = 1; in_ready = 1; end
+		if (in_valid) ns = 1; 
 	    end
 	    1: begin  // Load into HMAC
 		if (prf_r_o) ns = 2;
+		in_ready = 1;
 		prf_v_i = 1;
 	    end
 	    2: begin  // Wait for HMAC
@@ -66,14 +67,14 @@ module pbkdf2(
 		    prf_r_i = 1;
 		    if (count_plus_one == iters) ns = 3;  // hash finished
 		    else begin 
-			new_count = count_plus_one;  // iterate
+			incr_count = 1;  // iterate
 			ns = 1;
 		    end
 		end
 		
 	    end
 	    3: begin  // Output Result
-		if (out_ready) ns = 0;
+		if (out_ready) begin ns = 0; rst_count = 1; end
 		out_valid = 1;
 	    end
 	endcase
@@ -81,14 +82,16 @@ module pbkdf2(
 
     
     always @(posedge clk_i) begin
+
 	if (rst_i) begin
 	    ps <= 0;
 	    count <= 0;
 	    iters <= 0;
 	end else
 	    ps <= ns;
-	    count <= new_count;
-	    prf_reg <= new_prf;
+	    if (incr_count) count <= count_plus_one;
+	    else if (rst_count) count <= 0;
+	    prf_reg <= prf_o;
 
 	    if (in_valid) begin  // load values
 		iters <= iters_i; 

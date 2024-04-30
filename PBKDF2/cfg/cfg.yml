@@ -1,8 +1,8 @@
 # Main hammer config file
 
 # Set top levels
-synthesis.inputs.top_module: "bsg_cgol_cell"
-sim.inputs.tb_name: "bsg_cgol_cell_tb"
+synthesis.inputs.top_module: "pbkdf2"
+sim.inputs.tb_name: "pbkdf2_tb"
 
 # Don't synthesize these gate-level netlist modules
 synthesis.inputs.preserve_modules: []
@@ -22,8 +22,8 @@ vlsi.inputs.placement_constraints:
   - path: "TOP" # (this name isn't actually checked...)
     type: toplevel
     # define chip dimensions
-    width:  200
-    height: 200
+    width:  500
+    height: 500
     x: 0
     y: 0
     margins: {left: 0, right: 0, top: 0, bottom: 0}

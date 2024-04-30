@@ -134,7 +134,7 @@ module sha256 (
                 W <= W_next;
 
             end else if (state == FINISHED) begin
-                $display("Out: %64h", out);
+                //$display("Out: %64h", out);
                 if (out_ready == 1) begin
                     out_valid <= 0;
                     state <= WAITING;

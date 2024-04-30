@@ -73,12 +73,12 @@ module pbkdf2_tb;
         dut_data_r  <= dut_data_lo;
     end
 
-    hmac_sha256 DUT (
+    pbkdf2 DUT (
 	 .clk_i(clk)
 	,.rst_i(reset)
 
-	,.salt_len_i(1061:1056])
-	,.iters_i([1055:1024)
+	,.salt_len_i(tr_data_lo[1061:1056])
+	,.iters_i(tr_data_lo[1055:1024])
 
 	,.pass_i(tr_data_lo[1023:512])
 	,.salt_i(tr_data_lo[511:0])
@@ -89,7 +89,7 @@ module pbkdf2_tb;
 	,.in_valid(tr_v_lo)
 	,.in_ready(dut_ready_lo)
 	,.out_valid(dut_v_lo)
-	,.out_reaady(dut_yumi_li)
+	,.out_ready(dut_yumi_li)
 	);
 
   
@@ -97,5 +97,7 @@ module pbkdf2_tb;
   always_ff @(negedge clk) begin
     dut_yumi_li <= tr_ready_lo & dut_v_lo;
   end
+
+  initial #10000ns $finish;
 
 endmodule
