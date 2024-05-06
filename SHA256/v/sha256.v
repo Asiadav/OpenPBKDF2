@@ -32,9 +32,43 @@ function [31:0] message(input [31:0] sixteen, input [31:0] fifteen, input [31:0]
 	end
 endfunction
 
+typedef struct {
+    logic [31:0] a;
+    logic [31:0] b;
+    logic [31:0] c;
+    logic [31:0] d;
+    logic [31:0] e;
+    logic [31:0] f;
+    logic [31:0] g;
+    logic [31:0] h;
+} stage;
+
+module sha256_stage(
+    input stage in_stage,
+    output stage out_stage,
+    input [31:0] w,
+    input [31:0] k
+);
+
+    logic [0:31] ch, temp1, maj, temp2;
+	assign ch = ((in_stage.e & in_stage.f) ^ ((~in_stage.e) & in_stage.g));
+	assign temp1 = (in_stage.h + S1(in_stage.e)) + ch + (k + w);
+	assign maj = ((in_stage.a & in_stage.b) ^ (in_stage.a & in_stage.c) ^ (in_stage.b & in_stage.c));
+	assign temp2 = S0(in_stage.a) + maj;
+
+    assign out_stage.h = in_stage.g;
+    assign out_stage.g = in_stage.f;
+    assign out_stage.f = in_stage.e;
+    assign out_stage.e = in_stage.d + temp1;
+    assign out_stage.d = in_stage.c;
+    assign out_stage.c = in_stage.b;
+    assign out_stage.b = in_stage.a;
+    assign out_stage.a = temp1 + temp2;
+endmodule
+
 module sha256 (
      input logic clk_i
-    ,input logic rst_i  
+    ,input logic rst_i
   
     ,input logic in_valid
     ,input [511:0] in
@@ -44,7 +78,7 @@ module sha256 (
     ,output logic out_valid
     ,output logic [255:0] out
     ,input logic out_ready);
-  
+
 
     localparam H0_INITIAL = 32'h6a09e667;
 	localparam H1_INITIAL = 32'hbb67ae85;
@@ -54,28 +88,12 @@ module sha256 (
 	localparam H5_INITIAL = 32'h9b05688c;
 	localparam H6_INITIAL = 32'h1f83d9ab;
 	localparam H7_INITIAL = 32'h5be0cd19;
-	logic [31:0] K [0:63] = '{
-		32'h428a2f98, 32'h71374491, 32'hb5c0fbcf, 32'he9b5dba5,
-		32'h3956c25b, 32'h59f111f1, 32'h923f82a4, 32'hab1c5ed5,
-		32'hd807aa98, 32'h12835b01, 32'h243185be, 32'h550c7dc3,
-		32'h72be5d74, 32'h80deb1fe, 32'h9bdc06a7, 32'hc19bf174,
-		32'he49b69c1, 32'hefbe4786, 32'h0fc19dc6, 32'h240ca1cc,
-		32'h2de92c6f, 32'h4a7484aa, 32'h5cb0a9dc, 32'h76f988da,
-		32'h983e5152, 32'ha831c66d, 32'hb00327c8, 32'hbf597fc7,
-		32'hc6e00bf3, 32'hd5a79147, 32'h06ca6351, 32'h14292967,
-		32'h27b70a85, 32'h2e1b2138, 32'h4d2c6dfc, 32'h53380d13,
-		32'h650a7354, 32'h766a0abb, 32'h81c2c92e, 32'h92722c85,
-		32'ha2bfe8a1, 32'ha81a664b, 32'hc24b8b70, 32'hc76c51a3,
-		32'hd192e819, 32'hd6990624, 32'hf40e3585, 32'h106aa070,
-		32'h19a4c116, 32'h1e376c08, 32'h2748774c, 32'h34b0bcb5,
-		32'h391c0cb3, 32'h4ed8aa4a, 32'h5b9cca4f, 32'h682e6ff3,
-		32'h748f82ee, 32'h78a5636f, 32'h84c87814, 32'h8cc70208,
-		32'h90befffa, 32'ha4506ceb, 32'hbef9a3f7, 32'hc67178f2};
 
     enum {WAITING, RUNNING, FINISHED} state;
 
-	logic [0:31] H [0: 7], H_next [0: 7]; // 8 H values
-	logic [0:31] W_history [0:15], W, W_next; // 64 W values
+    logic [31:0] K;
+	logic [31:0] H [0: 7], H_next [0: 7]; // 8 H values
+	logic [31:0] W_history [0:15], W, W_next; // 64 W values
     logic [6:0] cycle; // 0 - 64; 0-63 are message scheduling, 1-64 are compression
 
     logic [511: 0] saved_in;
@@ -129,8 +147,22 @@ module sha256 (
                     out_valid <= 0;
                 end
 
-                W_history[1:15] <= W_history[0:14];
-                W_history[0] <= W_next;
+                W_history[15] <= W_history[14];
+                W_history[14] <= W_history[13];
+                W_history[13] <= W_history[12];
+                W_history[12] <= W_history[11];
+                W_history[11] <= W_history[10];
+                W_history[10] <= W_history[ 9];
+                W_history[ 9] <= W_history[ 8];
+                W_history[ 8] <= W_history[ 7];
+                W_history[ 7] <= W_history[ 6];
+                W_history[ 6] <= W_history[ 5];
+                W_history[ 5] <= W_history[ 4];
+                W_history[ 4] <= W_history[ 3];
+                W_history[ 3] <= W_history[ 2];
+                W_history[ 2] <= W_history[ 1];
+                W_history[ 1] <= W_history[ 0];
+                W_history[ 0] <= W_next;
                 W <= W_next;
 
             end else if (state == FINISHED) begin
@@ -142,112 +174,165 @@ module sha256 (
             end
 		end
 	end
-	
+
 	always_ff @(posedge clk_i) begin
 		if (rst_i || state != RUNNING) cycle <= 0;
 		else cycle <= cycle + 6'b1;
 	end
 
+    stage in_stage, out_stage;
 
-	logic [0:31] a, a_next, b, b_next, c, c_next, d, d_next,
-				 e, e_next, f, f_next, g, g_next, h, h_next;
+    sha256_stage sha_stage
+    (
+        .in_stage,
+        .out_stage,
+        .w(W),
+        .k(K)
+    );
 
 	always_ff @(posedge clk_i) begin
 		if (rst_i) begin
-			a <= H0_INITIAL;
-			b <= H1_INITIAL;
-			c <= H2_INITIAL;
-			d <= H3_INITIAL;
-			e <= H4_INITIAL;
-			f <= H5_INITIAL;
-			g <= H6_INITIAL;
-			h <= H7_INITIAL;
+			in_stage.a <= H0_INITIAL;
+			in_stage.b <= H1_INITIAL;
+			in_stage.c <= H2_INITIAL;
+			in_stage.d <= H3_INITIAL;
+			in_stage.e <= H4_INITIAL;
+			in_stage.f <= H5_INITIAL;
+			in_stage.g <= H6_INITIAL;
+			in_stage.h <= H7_INITIAL;
 		end else begin
 			if (state == RUNNING) begin
 				if (cycle == 0) begin
-					a <= saved_new ? H0_INITIAL : H[0];
-					b <= saved_new ? H1_INITIAL : H[1];
-					c <= saved_new ? H2_INITIAL : H[2];
-					d <= saved_new ? H3_INITIAL : H[3];
-					e <= saved_new ? H4_INITIAL : H[4];
-					f <= saved_new ? H5_INITIAL : H[5];
-					g <= saved_new ? H6_INITIAL : H[6];
-					h <= saved_new ? H7_INITIAL : H[7];
+					in_stage.a <= saved_new ? H0_INITIAL : H[0];
+					in_stage.b <= saved_new ? H1_INITIAL : H[1];
+					in_stage.c <= saved_new ? H2_INITIAL : H[2];
+					in_stage.d <= saved_new ? H3_INITIAL : H[3];
+					in_stage.e <= saved_new ? H4_INITIAL : H[4];
+					in_stage.f <= saved_new ? H5_INITIAL : H[5];
+					in_stage.g <= saved_new ? H6_INITIAL : H[6];
+					in_stage.h <= saved_new ? H7_INITIAL : H[7];
 				end else begin
-					a <= a_next;
-					b <= b_next;
-					c <= c_next;
-					d <= d_next;
-					e <= e_next;
-					f <= f_next;
-					g <= g_next;
-					h <= h_next;
+					in_stage.a <= out_stage.a;
+					in_stage.b <= out_stage.b;
+					in_stage.c <= out_stage.c;
+					in_stage.d <= out_stage.d;
+					in_stage.e <= out_stage.e;
+					in_stage.f <= out_stage.f;
+					in_stage.g <= out_stage.g;
+					in_stage.h <= out_stage.h;
 				end
 				// if (cycle >= 1) begin
 					// $display("Cycle %d", cycle);
-					// $display("a  %32b", a);
-					// $display("b  %32b", b);
-					// $display("c  %32b", c);
-					// $display("d  %32b", d);
-					// $display("e  %32b", e);
-					// $display("f  %32b", f);
-					// $display("g  %32b", g);
-					// $display("h  %32b", h);
+					// $display("a  %32b", in_stage.a);
+					// $display("b  %32b", in_stage.b);
+					// $display("c  %32b", in_stage.c);
+					// $display("d  %32b", in_stage.d);
+					// $display("e  %32b", in_stage.e);
+					// $display("f  %32b", in_stage.f);
+					// $display("g  %32b", in_stage.g);
+					// $display("h  %32b", in_stage.h);
                     // $display();
 				// end
 			end
 		end
 	end
 
-	logic [0:31] ch, temp1, maj, temp2;
-	assign ch = ((e & f) ^ ((~e) & g));
-	assign temp1 = (h + S1(e)) + ch + (K[cycle[5:0] - 5'b1] + W);
-	assign maj = ((a & b) ^ (a & c) ^ (b & c));
-	assign temp2 = S0(a) + maj;
+    always_comb begin
+        case(cycle)
+            0:  W_next  = saved_in[8 * 4 * 15 + 8 * 0 +:32];
+            1:  W_next  = saved_in[8 * 4 * 14 + 8 * 0 +:32];
+            2:  W_next  = saved_in[8 * 4 * 13 + 8 * 0 +:32];
+            3:  W_next  = saved_in[8 * 4 * 12 + 8 * 0 +:32];
+            4:  W_next  = saved_in[8 * 4 * 11 + 8 * 0 +:32];
+            5:  W_next  = saved_in[8 * 4 * 10 + 8 * 0 +:32];
+            6:  W_next  = saved_in[8 * 4 *  9 + 8 * 0 +:32];
+            7:  W_next  = saved_in[8 * 4 *  8 + 8 * 0 +:32];
+            8:  W_next  = saved_in[8 * 4 *  7 + 8 * 0 +:32];
+            9:  W_next  = saved_in[8 * 4 *  6 + 8 * 0 +:32];
+            10: W_next  = saved_in[8 * 4 *  5 + 8 * 0 +:32];
+            11: W_next  = saved_in[8 * 4 *  4 + 8 * 0 +:32];
+            12: W_next  = saved_in[8 * 4 *  3 + 8 * 0 +:32];
+            13: W_next  = saved_in[8 * 4 *  2 + 8 * 0 +:32];
+            14: W_next  = saved_in[8 * 4 *  1 + 8 * 0 +:32];
+            15: W_next  = saved_in[8 * 4 *  0 + 8 * 0 +:32];
+            default: W_next =  (W_history[4'd15] + s0(W_history[4'd14])) + (W_history[4'd06] + s1(W_history[4'd01]));
+        endcase
 
-	always_comb begin
-		if (cycle < 16) begin
-			case(cycle)
-				 0: W_next  = {saved_in[8 * 4 * 16 - 1 + 24: 8 * 4 * 15 + 24], saved_in[8 * 4 * 16 - 1 + 16: 8 * 4 * 15 + 16], saved_in[8 * 4 * 16 - 1 + 8: 8 * 4 * 15 + 8], saved_in[8 * 4 * 16 - 1: 8 * 4 * 15]};
-				 1: W_next  = {saved_in[8 * 4 * 15 - 1 + 24: 8 * 4 * 14 + 24], saved_in[8 * 4 * 15 - 1 + 16: 8 * 4 * 14 + 16], saved_in[8 * 4 * 15 - 1 + 8: 8 * 4 * 14 + 8], saved_in[8 * 4 * 15 - 1: 8 * 4 * 14]};
-				 2: W_next  = {saved_in[8 * 4 * 14 - 1 + 24: 8 * 4 * 13 + 24], saved_in[8 * 4 * 14 - 1 + 16: 8 * 4 * 13 + 16], saved_in[8 * 4 * 14 - 1 + 8: 8 * 4 * 13 + 8], saved_in[8 * 4 * 14 - 1: 8 * 4 * 13]};
-				 3: W_next  = {saved_in[8 * 4 * 13 - 1 + 24: 8 * 4 * 12 + 24], saved_in[8 * 4 * 13 - 1 + 16: 8 * 4 * 12 + 16], saved_in[8 * 4 * 13 - 1 + 8: 8 * 4 * 12 + 8], saved_in[8 * 4 * 13 - 1: 8 * 4 * 12]};
-				 4: W_next  = {saved_in[8 * 4 * 12 - 1 + 24: 8 * 4 * 11 + 24], saved_in[8 * 4 * 12 - 1 + 16: 8 * 4 * 11 + 16], saved_in[8 * 4 * 12 - 1 + 8: 8 * 4 * 11 + 8], saved_in[8 * 4 * 12 - 1: 8 * 4 * 11]};
-				 5: W_next  = {saved_in[8 * 4 * 11 - 1 + 24: 8 * 4 * 10 + 24], saved_in[8 * 4 * 11 - 1 + 16: 8 * 4 * 10 + 16], saved_in[8 * 4 * 11 - 1 + 8: 8 * 4 * 10 + 8], saved_in[8 * 4 * 11 - 1: 8 * 4 * 10]};
-				 6: W_next  = {saved_in[8 * 4 * 10 - 1 + 24: 8 * 4 *  9 + 24], saved_in[8 * 4 * 10 - 1 + 16: 8 * 4 *  9 + 16], saved_in[8 * 4 * 10 - 1 + 8: 8 * 4 *  9 + 8], saved_in[8 * 4 * 10 - 1: 8 * 4 *  9]};
-				 7: W_next  = {saved_in[8 * 4 *  9 - 1 + 24: 8 * 4 *  8 + 24], saved_in[8 * 4 *  9 - 1 + 16: 8 * 4 *  8 + 16], saved_in[8 * 4 *  9 - 1 + 8: 8 * 4 *  8 + 8], saved_in[8 * 4 *  9 - 1: 8 * 4 *  8]};
-				 8: W_next  = {saved_in[8 * 4 *  8 - 1 + 24: 8 * 4 *  7 + 24], saved_in[8 * 4 *  8 - 1 + 16: 8 * 4 *  7 + 16], saved_in[8 * 4 *  8 - 1 + 8: 8 * 4 *  7 + 8], saved_in[8 * 4 *  8 - 1: 8 * 4 *  7]};
-				 9: W_next  = {saved_in[8 * 4 *  7 - 1 + 24: 8 * 4 *  6 + 24], saved_in[8 * 4 *  7 - 1 + 16: 8 * 4 *  6 + 16], saved_in[8 * 4 *  7 - 1 + 8: 8 * 4 *  6 + 8], saved_in[8 * 4 *  7 - 1: 8 * 4 *  6]};
-				10: W_next  = {saved_in[8 * 4 *  6 - 1 + 24: 8 * 4 *  5 + 24], saved_in[8 * 4 *  6 - 1 + 16: 8 * 4 *  5 + 16], saved_in[8 * 4 *  6 - 1 + 8: 8 * 4 *  5 + 8], saved_in[8 * 4 *  6 - 1: 8 * 4 *  5]};
-				11: W_next  = {saved_in[8 * 4 *  5 - 1 + 24: 8 * 4 *  4 + 24], saved_in[8 * 4 *  5 - 1 + 16: 8 * 4 *  4 + 16], saved_in[8 * 4 *  5 - 1 + 8: 8 * 4 *  4 + 8], saved_in[8 * 4 *  5 - 1: 8 * 4 *  4]};
-				12: W_next  = {saved_in[8 * 4 *  4 - 1 + 24: 8 * 4 *  3 + 24], saved_in[8 * 4 *  4 - 1 + 16: 8 * 4 *  3 + 16], saved_in[8 * 4 *  4 - 1 + 8: 8 * 4 *  3 + 8], saved_in[8 * 4 *  4 - 1: 8 * 4 *  3]};
-				13: W_next  = {saved_in[8 * 4 *  3 - 1 + 24: 8 * 4 *  2 + 24], saved_in[8 * 4 *  3 - 1 + 16: 8 * 4 *  2 + 16], saved_in[8 * 4 *  3 - 1 + 8: 8 * 4 *  2 + 8], saved_in[8 * 4 *  3 - 1: 8 * 4 *  2]};
-				14: W_next  = {saved_in[8 * 4 *  2 - 1 + 24: 8 * 4 *  1 + 24], saved_in[8 * 4 *  2 - 1 + 16: 8 * 4 *  1 + 16], saved_in[8 * 4 *  2 - 1 + 8: 8 * 4 *  1 + 8], saved_in[8 * 4 *  2 - 1: 8 * 4 *  1]};
-				15: W_next  = {saved_in[8 * 4 *  1 - 1 + 24: 8 * 4 *  0 + 24], saved_in[8 * 4 *  1 - 1 + 16: 8 * 4 *  0 + 16], saved_in[8 * 4 *  1 - 1 + 8: 8 * 4 *  0 + 8], saved_in[8 * 4 *  1 - 1: 8 * 4 *  0]};
-			endcase
-		end else begin
-			W_next =  (W_history[4'd15]   +
-					s0(W_history[4'd14])) +
-					  (W_history[4'd06]   +
-					s1(W_history[4'd01]));
-		end
-		
-        h_next = g;
-		g_next = f;
-		f_next = e;
-		e_next = d + temp1;
-		d_next = c;
-		c_next = b;
-		b_next = a;
-		a_next = temp1 + temp2;
-		H_next[0] = H[0] + a_next;
-		H_next[1] = H[1] + b_next;
-		H_next[2] = H[2] + c_next;
-		H_next[3] = H[3] + d_next;
-		H_next[4] = H[4] + e_next;
-		H_next[5] = H[5] + f_next;
-		H_next[6] = H[6] + g_next;
-		H_next[7] = H[7] + h_next;
-	end
+        case(cycle)
+            default: K = 32'b0;
+            01: K = 32'h428a2f98;
+            02: K = 32'h71374491;
+            03: K = 32'hb5c0fbcf;
+            04: K = 32'he9b5dba5;
+            05: K = 32'h3956c25b;
+            06: K = 32'h59f111f1;
+            07: K = 32'h923f82a4;
+            08: K = 32'hab1c5ed5;
+            09: K = 32'hd807aa98;
+            10: K = 32'h12835b01;
+            11: K = 32'h243185be;
+            12: K = 32'h550c7dc3;
+            13: K = 32'h72be5d74;
+            14: K = 32'h80deb1fe;
+            15: K = 32'h9bdc06a7;
+            16: K = 32'hc19bf174;
+            17: K = 32'he49b69c1;
+            18: K = 32'hefbe4786;
+            19: K = 32'h0fc19dc6;
+            20: K = 32'h240ca1cc;
+            21: K = 32'h2de92c6f;
+            22: K = 32'h4a7484aa;
+            23: K = 32'h5cb0a9dc;
+            24: K = 32'h76f988da;
+            25: K = 32'h983e5152;
+            26: K = 32'ha831c66d;
+            27: K = 32'hb00327c8;
+            28: K = 32'hbf597fc7;
+            29: K = 32'hc6e00bf3;
+            30: K = 32'hd5a79147;
+            31: K = 32'h06ca6351;
+            32: K = 32'h14292967;
+            33: K = 32'h27b70a85;
+            34: K = 32'h2e1b2138;
+            35: K = 32'h4d2c6dfc;
+            36: K = 32'h53380d13;
+            37: K = 32'h650a7354;
+            38: K = 32'h766a0abb;
+            39: K = 32'h81c2c92e;
+            40: K = 32'h92722c85;
+            41: K = 32'ha2bfe8a1;
+            42: K = 32'ha81a664b;
+            43: K = 32'hc24b8b70;
+            44: K = 32'hc76c51a3;
+            45: K = 32'hd192e819;
+            46: K = 32'hd6990624;
+            47: K = 32'hf40e3585;
+            48: K = 32'h106aa070;
+            49: K = 32'h19a4c116;
+            50: K = 32'h1e376c08;
+            51: K = 32'h2748774c;
+            52: K = 32'h34b0bcb5;
+            53: K = 32'h391c0cb3;
+            54: K = 32'h4ed8aa4a;
+            55: K = 32'h5b9cca4f;
+            56: K = 32'h682e6ff3;
+            57: K = 32'h748f82ee;
+            58: K = 32'h78a5636f;
+            59: K = 32'h84c87814;
+            60: K = 32'h8cc70208;
+            61: K = 32'h90befffa;
+            62: K = 32'ha4506ceb;
+            63: K = 32'hbef9a3f7;
+            64: K = 32'hc67178f2;
+        endcase
+    end
+
+    assign H_next[0] = H[0] + out_stage.a;
+    assign H_next[1] = H[1] + out_stage.b;
+    assign H_next[2] = H[2] + out_stage.c;
+    assign H_next[3] = H[3] + out_stage.d;
+    assign H_next[4] = H[4] + out_stage.e;
+    assign H_next[5] = H[5] + out_stage.f;
+    assign H_next[6] = H[6] + out_stage.g;
+    assign H_next[7] = H[7] + out_stage.h;
 endmodule
-
