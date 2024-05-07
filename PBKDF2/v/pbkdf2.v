@@ -87,6 +87,7 @@ module pbkdf2(
 	    ps <= 0;
 	    count <= 0;
 	    iters <= 0;
+	    hash_o <= 0;
 	end else
 	    ps <= ns;
 	    if (incr_count) count <= count_plus_one;

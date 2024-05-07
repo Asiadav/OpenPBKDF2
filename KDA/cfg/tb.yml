@@ -109,7 +109,7 @@ sim.inputs.tb_defines_meta: [subst]
 
 # List of trace files for the simulation
 sim.inputs.trace_files: [
-  "v/bsg_trace_master_0.tr"
+  "v/trace.tr"
 ]
 
 #sim.inputs.trace_files_meta: [subst]

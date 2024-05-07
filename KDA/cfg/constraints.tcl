@@ -5,8 +5,8 @@
 # you may manually define constraints here as well.
 #
 
-set CORE_CLOCK_PERIOD      4.5
-set IO_MASTER_CLOCK_PERIOD 11
+set CORE_CLOCK_PERIOD      10
+set IO_MASTER_CLOCK_PERIOD 20
 
 # << arguments >>
 # bsg_chip_timing_constraint

@@ -123,12 +123,11 @@ synthesis.inputs.input_files: [
   # Top level sources
   "v/bsg_chip.v",
   "v/bsg_test_node_client.v",
-  "v/bsg_cgol.v",
-  "v/bsg_cgol_ctrl.v",
-  "v/bsg_cgol_input_data_channel.v",
-  "v/bsg_cgol_output_data_channel.v",
-  "v/bsg_cgol_cell_array.v",
-  "../bsg_cgol_cell/v/bsg_cgol_cell.v",
+  "v/kda.v",
+  "../PBKDF2/v/pbkdf2.v",
+  "../HMAC_SHA256/v/hmac_sha256.v",
+  "../SHA256_1024IN/v/sha256_1024in.v",
+  "../SHA256/v/sha256.v"
 ]
 synthesis.inputs.input_files_meta: [append, subst]
 

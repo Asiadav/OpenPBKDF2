@@ -27,15 +27,9 @@ module  bsg_test_node_client #(parameter ring_width_p="inv"
   /** INSTANTIATE NODE 0 **/
   if ( client_id_p == 0 ) begin
 
-    bsg_cgol #(
-        .board_width_p(32)
-       ,.max_game_length_p(1000)
-      // .board_width_p(3)
-      //,.max_game_length_p(1)
-    ) cgol_inst(
+    kda kda_inst(
        .clk_i(clk_i)
       ,.reset_i(reset_i)
-      ,.en_i(en_i)
       // Data input
       ,.data_i(data_li[63:0])
       ,.v_i(v_i)
