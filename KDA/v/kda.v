@@ -16,7 +16,7 @@ module kda
   logic [1:0] chunks;
   logic [5:0] salt_len;
   logic [31:0] iters;
-  logic [511:0] pass, salt;
+  logic [511:0] one, pass, salt;
   logic [1023:0] hash;
 
   logic input_channel_v;
@@ -64,7 +64,14 @@ module kda
     end
   end
 
-
+  // This feels bad
+  always_comb begin
+    for (int i = 0; i < 55; i++) begin
+      if ((salt_len+4) == i) begin
+	one = 1 << 8 * (64 - i); 
+      end      
+    end
+  end
 
   // pbkdf2 chunks
   pbkdf2 chunk0 (
@@ -73,7 +80,7 @@ module kda
     ,.salt_len_i (salt_len+4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
-    ,.salt_i     (salt|(1<<8*56))
+    ,.salt_i     (salt|one)
     ,.in_ready   (i_r0)
     ,.in_valid   (i_v0)
     ,.out_ready  (out_ready)
@@ -84,10 +91,10 @@ module kda
   pbkdf2 chunk1 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len)
+    ,.salt_len_i (salt_len+4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
-    ,.salt_i     (salt+2)
+    ,.salt_i     (salt|one<<1)
     ,.in_ready   (i_r1)
     ,.in_valid   (i_v1)
     ,.out_ready  (out_ready)
@@ -98,10 +105,10 @@ module kda
   pbkdf2 chunk2 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len)
+    ,.salt_len_i (salt_len+4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
-    ,.salt_i     (salt+3)
+    ,.salt_i     (salt|one|one<<1)
     ,.in_ready   (i_r2)
     ,.in_valid   (i_v2)
     ,.out_ready  (out_ready)
@@ -112,10 +119,10 @@ module kda
   pbkdf2 chunk3 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len)
+    ,.salt_len_i (salt_len+4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
-    ,.salt_i     (salt+4)
+    ,.salt_i     (salt|one<<2)
     ,.in_ready   (i_r3)
     ,.in_valid   (i_v3)
     ,.out_ready  (out_ready)
