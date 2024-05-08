@@ -32,7 +32,7 @@ module hmac_sha256 (
     ns = ps; r_o = 0; out_ready = 0; in_valid = 0; v_o = 0;
     case (ps)
 	0: begin  // Read Input
-	    if (v_i) begin ns = 1; $display("key_i: %h", key_i); $display("msg_i: %h", msg_i); $display("msg_len_i: %h", msg_len_i); end // new data recieved
+	    if (v_i) ns = 1; // new data recieved
 	end
 	1: begin  // Load Into Reg
 	    if (in_ready) ns = 2;
@@ -70,7 +70,7 @@ module hmac_sha256 (
             //prf_o <= 0;
         end else begin
             ps <= ns;
-            if (ns == 3'b001) begin in <= in_1; key_reg <= key_i; end // update the sha256 input register
+            if (ns == 3'b001) begin in <= in_1; key_reg <= key_i; $display("in: %h", in); $display("key_reg: %h", key_reg); end // update the sha256 input register
             if (ns == 3'b011) in <= in_2; // update the sha256 input register
             if (ns == 3'b101) prf_o <= out; // update the output register
         end
