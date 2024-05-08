@@ -38,6 +38,7 @@ module hmac_sha256 (
 	    if (in_ready) ns = 2;
 	    r_o = 1;
 	    in_valid = 1;
+	    $display("in: %h", in); $display("key_reg: %h", key_reg);
  	    $finish;
 	end
 	2: begin  // Wait for hash
@@ -70,7 +71,7 @@ module hmac_sha256 (
             //prf_o <= 0;
         end else begin
             ps <= ns;
-            if (ns == 3'b001) begin in <= in_1; key_reg <= key_i; $display("in: %h", in); $display("key_reg: %h", key_reg); end // update the sha256 input register
+            if (ns == 3'b001) begin in <= in_1; key_reg <= key_i; end // update the sha256 input register
             if (ns == 3'b011) in <= in_2; // update the sha256 input register
             if (ns == 3'b101) prf_o <= out; // update the output register
         end

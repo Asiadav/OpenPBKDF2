@@ -42,7 +42,7 @@ module kda
     ns = ps;
     case(ps)
 	0: begin  // wait for data from input channel
-	  if (input_channel_v) ns = 1;	   
+	  if (input_channel_v) begin ns = 1 end;	   
 	end
 	1: begin  // load data into PBKDF2 chunks
 	  if (in_ready) ns = 2;
@@ -69,7 +69,7 @@ module kda
   // pbkdf2 chunks
   pbkdf2 chunk0 (
      .clk_i      (clk_i)
-    ,.rst_i    (reset_i)
+    ,.rst_i      (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
@@ -83,7 +83,7 @@ module kda
 
   pbkdf2 chunk1 (
      .clk_i      (clk_i)
-    ,.rst_i    (reset_i)
+    ,.rst_i      (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
@@ -97,7 +97,7 @@ module kda
 
   pbkdf2 chunk2 (
      .clk_i      (clk_i)
-    ,.rst_i    (reset_i)
+    ,.rst_i      (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
@@ -111,7 +111,7 @@ module kda
 
   pbkdf2 chunk3 (
      .clk_i      (clk_i)
-    ,.rst_i    (reset_i)
+    ,.rst_i      (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
