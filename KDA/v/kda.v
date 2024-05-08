@@ -73,7 +73,7 @@ module kda
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
-    ,.salt_i     (salt+1<<8*59)
+    ,.salt_i     (salt+(1<<8*59))
     ,.in_ready   (i_r0)
     ,.in_valid   (i_v0)
     ,.out_ready  (out_ready)
