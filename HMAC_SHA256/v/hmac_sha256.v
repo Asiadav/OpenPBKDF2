@@ -32,12 +32,13 @@ module hmac_sha256 (
     ns = ps; r_o = 0; out_ready = 0; in_valid = 0; v_o = 0;
     case (ps)
 	0: begin  // Read Input
-	    if (v_i) begin ns = 1; $display("key_i: %h", key_i); $display("msg_i: %h", msg_i); $display("msg_len_i: %h", msg_len_i); $finish; end // new data recieved
+	    if (v_i) begin ns = 1; $display("key_i: %h", key_i); $display("msg_i: %h", msg_i); $display("msg_len_i: %h", msg_len_i); end // new data recieved
 	end
 	1: begin  // Load Into Reg
 	    if (in_ready) ns = 2;
 	    r_o = 1;
 	    in_valid = 1;
+ 	    $finish;
 	end
 	2: begin  // Wait for hash
 	    if (out_valid) begin ns = 3; out_ready = 1; end
