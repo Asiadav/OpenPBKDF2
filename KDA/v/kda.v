@@ -42,13 +42,7 @@ module kda
     ns = ps;
     case(ps)
 	0: begin  // wait for data from input channel
-	  if (input_channel_v) ns = 1;
-	  $display("chunks: %h", chunks);
-	  $display("salt_len: %h", salt_len);
-	  $display("iters: %h", iters);
-	  $display("pass: %h", pass);
-	  $display("salt: %h", salt);
-	   
+	  if (input_channel_v) ns = 1;	   
 	end
 	1: begin  // load data into PBKDF2 chunks
 	  if (in_ready) ns = 2;
