@@ -70,10 +70,10 @@ module kda
   pbkdf2 chunk0 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len)
+    ,.salt_len_i (salt_len+4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
-    ,.salt_i     (salt+(1<<8*60))
+    ,.salt_i     (salt|(1<<8*56))
     ,.in_ready   (i_r0)
     ,.in_valid   (i_v0)
     ,.out_ready  (out_ready)
