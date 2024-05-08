@@ -23,8 +23,8 @@ module hmac_sha256 (
     logic [2:0] ps, ns;
     logic [255:0] out;
     logic [439:0] one;
-    logic [511:0] pad;
-    logic [1023:0] in, in_1, in_2, key_reg;
+    logic [511:0] pad, key_reg;
+    logic [1023:0] in, in_1, in_2;
 
     sha256_1024in hasher (.clk_i, .rst_i, .in_valid, .in, .in_ready, .out_valid, .out, .out_ready);
 
@@ -38,7 +38,7 @@ module hmac_sha256 (
 	    if (in_ready) ns = 2;
 	    r_o = 1;
 	    in_valid = 1;
-	    $display("in: %h", in); $display("key_reg: %h", key_reg);
+	    $display("msg_i: %h", msg_i); $display("in: %h", in); $display("key_reg: %h", key_reg);
  	    $finish;
 	end
 	2: begin  // Wait for hash
