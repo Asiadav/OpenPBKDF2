@@ -30,7 +30,7 @@ module kda
   assign i_v0 = in_valid;                            // always
   assign i_v1 = in_valid & (chunks[1] | chunks[0]);  // chunks == 2'b11, 2'b10, 2'b01
   assign i_v2 = in_valid & (chunks[1]);              // chunks == 2'b11, 2'b10
-  assign i_v3 = in_Valid & (chunks[1] & chunks[0]);  // chunks == 2'b11
+  assign i_v3 = in_valid & (chunks[1] & chunks[0]);  // chunks == 2'b11
   
   assign out_valid = o_v0 | o_v1 | o_v2 | o_v3;
   assign in_ready  = i_r0 | i_r1 | i_r2 | i_r3;
@@ -43,6 +43,12 @@ module kda
     case(ps)
 	0: begin  // wait for data from input channel
 	  if (input_channel_v) ns = 1;
+	  $display("chunks: %h", chunks);
+	  $display("salt_len: %h", salt_len);
+	  $display("iters: %h", iters);
+	  $display("pass: %h", pass);
+	  $display("salt: %h", salt);
+	   
 	end
 	1: begin  // load data into PBKDF2 chunks
 	  if (in_ready) ns = 2;
@@ -59,7 +65,7 @@ module kda
   always @(posedge clk_i) begin
     if (reset_i) begin
       ps <= 0;
-    end else
+    end else begin
       ps <= ns;
     end
   end
@@ -69,7 +75,7 @@ module kda
   // pbkdf2 chunks
   pbkdf2 chunk0 (
      .clk_i      (clk_i)
-    ,.reset_i    (reset_i)
+    ,.rst_i    (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
@@ -83,7 +89,7 @@ module kda
 
   pbkdf2 chunk1 (
      .clk_i      (clk_i)
-    ,.reset_i    (reset_i)
+    ,.rst_i    (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
@@ -97,7 +103,7 @@ module kda
 
   pbkdf2 chunk2 (
      .clk_i      (clk_i)
-    ,.reset_i    (reset_i)
+    ,.rst_i    (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
@@ -111,7 +117,7 @@ module kda
 
   pbkdf2 chunk3 (
      .clk_i      (clk_i)
-    ,.reset_i    (reset_i)
+    ,.rst_i    (reset_i)
     ,.salt_len_i (salt_len)
     ,.iters_i    (iters)
     ,.pass_i     (pass)

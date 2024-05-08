@@ -16,7 +16,7 @@ module kda_input_data_channel (
   );
 
     logic [16:0] valid_lo;
-    logic [1063:0] data_sipo;
+    logic [1087:0] data_sipo;
     logic [4:0] yumi_cnt;
     
     bsg_serial_in_parallel_out #(
@@ -35,7 +35,7 @@ module kda_input_data_channel (
       ,.yumi_cnt_i (yumi_cnt)
     );
 
-    assign chunks   = data_sipo[1063:10:62];
+    assign chunks   = data_sipo[1063:1062];
     assign salt_len = data_sipo[1061:1056];
     assign iters    = data_sipo[1055:1024];
     assign pass     = data_sipo[1023:512];

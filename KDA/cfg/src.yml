@@ -124,6 +124,8 @@ synthesis.inputs.input_files: [
   "v/bsg_chip.v",
   "v/bsg_test_node_client.v",
   "v/kda.v",
+  "v/kda_input_data_channel.v",
+  "v/kda_output_data_channel.v",
   "../PBKDF2/v/pbkdf2.v",
   "../HMAC_SHA256/v/hmac_sha256.v",
   "../SHA256_1024IN/v/sha256_1024in.v",

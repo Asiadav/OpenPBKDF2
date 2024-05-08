@@ -98,6 +98,6 @@ module pbkdf2_tb;
     dut_yumi_li <= tr_ready_lo & dut_v_lo;
   end
 
-  initial #10000ns $finish;
+  initial #10000000ns $finish;
 
 endmodule

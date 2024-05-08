@@ -100,16 +100,16 @@ sim.inputs.tb_incdir_meta: [subst]
 sim.inputs.tb_defines: [
   "FSB_LEGACY=1",
   "NUM_MASTER_NODES=1",
-  "CORE_0_PERIOD=4500", # For ASIC
-  "IO_MASTER_0_PERIOD=11000", # For ASIC
-  "CORE_1_PERIOD=4500", # For testbench
-  "IO_MASTER_1_PERIOD=11000", # For testbench
+  "CORE_0_PERIOD=10000", # For ASIC
+  "IO_MASTER_0_PERIOD=20000", # For ASIC
+  "CORE_1_PERIOD=10000", # For testbench
+  "IO_MASTER_1_PERIOD=20000", # For testbench
 ]
 sim.inputs.tb_defines_meta: [subst]
 
 # List of trace files for the simulation
 sim.inputs.trace_files: [
-  "v/trace.tr"
+  "v/bsg_trace_master_0.tr"
 ]
 
 #sim.inputs.trace_files_meta: [subst]
