@@ -11,7 +11,7 @@ def make_trace_for(password: str, salt: str, iters: int, chunks: int) -> [str]:
     salt_bytes = salt.encode() + chunk.to_bytes(4, "big")
     pass_bytes = password.encode()
     initial = hmac.new(pass_bytes, salt_bytes, hashlib.sha256).hexdigest()
-    # print(f"# hmac 1: {initial}")
+    print(f"# hmac 1: {initial}")
 
     prev = initial
     out = initial

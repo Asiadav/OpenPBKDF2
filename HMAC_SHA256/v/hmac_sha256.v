@@ -38,8 +38,6 @@ module hmac_sha256 (
 	    if (in_ready) ns = 2;
 	    r_o = 1;
 	    in_valid = 1;
-	    //$display("msg_i: %h", msg_i); $display("in: %h", in); $display("key_reg: %h", key_reg);
- 	    //$finish;
 	end
 	2: begin  // Wait for hash
 	    if (out_valid) begin ns = 3; out_ready = 1; end
@@ -55,6 +53,8 @@ module hmac_sha256 (
 	    if (r_i) ns = 0;
 	    out_ready = 1;
 	    v_o = 1;
+	    $display("prf_o: %h", prf_o);
+ 	    $finish;
 	end
 	default:  begin end// unused
     endcase
