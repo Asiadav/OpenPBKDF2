@@ -1,6 +1,6 @@
 /**
 * HMAC using SHA256 Encryption
-* input the password or the previously 
+* input the password and the salt to get the keyed has output 
 **/
 
 module hmac_sha256 (
@@ -32,7 +32,7 @@ module hmac_sha256 (
     ns = ps; r_o = 0; out_ready = 0; in_valid = 0; v_o = 0;
     case (ps)
 	0: begin  // Read Input
-	    if (v_i) ns = 1; // new data recieved
+	    if (v_i) begin ns = 1; $display("key_i: %h", key_i); $display(msg_i: %h", msg_i); $display("msg_len_i: %h", msg_len_i);end // new data recieved
 	end
 	1: begin  // Load Into Reg
 	    if (in_ready) ns = 2;
