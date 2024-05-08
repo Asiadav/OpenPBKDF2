@@ -53,8 +53,6 @@ module hmac_sha256 (
 	    if (r_i) ns = 0;
 	    out_ready = 1;
 	    v_o = 1;
-	    $display("prf_o: %h", prf_o);
- 	    $finish;
 	end
 	default:  begin end// unused
     endcase
