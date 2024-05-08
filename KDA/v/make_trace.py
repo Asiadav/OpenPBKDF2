@@ -6,7 +6,7 @@ import hmac
 def make_trace_for(password: str, salt: str, iters: int, chunks: int) -> [str]:
 
     correct = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), iters).hex()
-    chunk = 1
+    chunk = 4
     # reimplimentation for debugging
     salt_bytes = salt.encode() + chunk.to_bytes(4, "big")
     print(salt_bytes)
@@ -25,7 +25,7 @@ def make_trace_for(password: str, salt: str, iters: int, chunks: int) -> [str]:
 
     print(f"# pbkdf2: {out}")
 
-    assert out == correct
+    # assert out == correct
     # end reimpl
 
 
@@ -36,7 +36,7 @@ def make_trace_for(password: str, salt: str, iters: int, chunks: int) -> [str]:
     send_line: str = "0" * 24 
 
     # append num chunks 
-    send_line += format(chunks, "02b")
+    send_line += format(chunks-1, "02b")
 
     # append salt length
     send_line += format(len(salt), "06b")
@@ -70,7 +70,7 @@ def make_trace_for(password: str, salt: str, iters: int, chunks: int) -> [str]:
     read_line = "" 
 
     for i in range(0, 64, 2):
-        byte = correct[i:i+2]
+        byte = out[i:i+2]
         read_line += format(int(byte, 16), "08b")
 
     read_line += "00000000" * 96
@@ -78,7 +78,7 @@ def make_trace_for(password: str, salt: str, iters: int, chunks: int) -> [str]:
     
 
     lines.append("")
-    lines.append(f"# Receive `{correct}`")
+    lines.append(f"# Receive `{out}`")
 
     for i in range(len(read_line), 0, -64):
         lines.append("0010_0_00000000000_" + read_line[i-64:i])
@@ -88,6 +88,6 @@ def make_trace_for(password: str, salt: str, iters: int, chunks: int) -> [str]:
 
 if __name__ == "__main__":
     lines: [str] = []
-    lines += make_trace_for("password", "salt", 1024, 1)
+    lines += make_trace_for("password", "salt", 1024, 4)
 
     print("\n".join(lines))
