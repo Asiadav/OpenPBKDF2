@@ -27,6 +27,7 @@ module  bsg_test_node_client #(parameter ring_width_p="inv"
   /** INSTANTIATE NODE 0 **/
   if ( client_id_p == 0 ) begin
 
+
     kda kda_inst(
        .clk_i(clk_i)
       ,.reset_i(reset_i)
