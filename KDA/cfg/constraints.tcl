@@ -6,7 +6,7 @@
 #
 
 set CORE_CLOCK_PERIOD      10
-set IO_MASTER_CLOCK_PERIOD 20
+set IO_MASTER_CLOCK_PERIOD 12
 
 # << arguments >>
 # bsg_chip_timing_constraint

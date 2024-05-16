@@ -77,7 +77,7 @@ module kda
   pbkdf2 chunk0 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len+4)
+    ,.salt_len_i (salt_len+6'd4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
     ,.salt_i     (salt|one)
@@ -91,7 +91,7 @@ module kda
   pbkdf2 chunk1 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len+4)
+    ,.salt_len_i (salt_len+6'd4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
     ,.salt_i     (salt|one<<1)
@@ -105,7 +105,7 @@ module kda
   pbkdf2 chunk2 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len+4)
+    ,.salt_len_i (salt_len+6'd4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
     ,.salt_i     (salt|one|one<<1)
@@ -119,7 +119,7 @@ module kda
   pbkdf2 chunk3 (
      .clk_i      (clk_i)
     ,.rst_i      (reset_i)
-    ,.salt_len_i (salt_len+4)
+    ,.salt_len_i (salt_len+6'd4)
     ,.iters_i    (iters)
     ,.pass_i     (pass)
     ,.salt_i     (salt|one<<2)

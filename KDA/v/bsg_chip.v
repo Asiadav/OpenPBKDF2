@@ -12,6 +12,7 @@ module bsg_chip
 
     // Pack the input data
     //
+
     wire [7:0] sdi_data_i_int_packed [0:0];
     bsg_make_2D_array #(.width_p(8)
                        ,.items_p(1))
