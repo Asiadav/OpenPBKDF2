@@ -21,9 +21,9 @@ formal.inputs.hdl_search_paths:
 formal.inputs.hdl_search_paths_meta: [subst]
 
 par.innovus.floorplan_mode: "generateplusmanual"
-par.innovus.floorplan_script_contents: "
-	create_fence -name guts/link_downstream -area 50 150 250 450 \n
-	create_fence -name guts/link_upstream -area 350 100 450 400 \n"
+par.innovus.floorplan_script_contents: ""
+	# create_fence -name guts/link_downstream -area 50 150 250 450 \n
+	# create_fence -name guts/link_upstream -area 350 100 450 400 \n"
 
 # Custom SDC constraints
 vlsi.inputs:
