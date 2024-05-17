@@ -39,7 +39,6 @@ module sha256_1024in (
 	    in_ready = 1;
 	    new_hash = 1;
 	    out_r = 1;
-	    $display("sha in: %h", in);
 	end
 	1: begin  // Load Second Chunk Into SHA256
 	    if (out_v) begin out_r = 1; ns = 2; end

@@ -61,9 +61,6 @@ module pbkdf2(
 		if (prf_r_o) ns = 2;
 		in_ready = 1;
 		prf_v_i = prf_r_o;
-	        $display("iters: %h", iters);
-	        $display("pass: %h", pass);
-	        $display("salt: %h", salt);
 	    end
 	    2: begin  // Wait for HMAC
 		if (prf_v_o) begin
@@ -84,8 +81,6 @@ module pbkdf2(
     end
 
     always @(posedge clk_i) begin
-	$display("clock");
-
 	if (rst_i) begin
 	    ps <= 0;
 	    count <= 0;

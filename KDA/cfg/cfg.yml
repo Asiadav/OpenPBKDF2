@@ -20,7 +20,7 @@ formal.inputs.hdl_search_paths:
   - "../../../common/v/manycore/vanilla_bean"
 formal.inputs.hdl_search_paths_meta: [subst]
 
-par.innovus.floorplan_mode: "generateplusmanual"
+# par.innovus.floorplan_mode: "generateplusmanual"
 
 # Custom SDC constraints
 vlsi.inputs:
