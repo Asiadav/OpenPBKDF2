@@ -21,9 +21,6 @@ formal.inputs.hdl_search_paths:
 formal.inputs.hdl_search_paths_meta: [subst]
 
 par.innovus.floorplan_mode: "generateplusmanual"
-par.innovus.floorplan_script_contents: "
-	create_fence -name guts/link_downstream -area 50 50 250 1200 \n
-	create_fence -name guts/link_upstream -area 100 50 1200 1200 \n"
 
 # Custom SDC constraints
 vlsi.inputs:
@@ -37,19 +34,19 @@ vlsi.inputs:
     - "constraints.tcl"
   custom_sdc_files_meta: prependlocal # Prepend path of this config file!
 
-  pin.assignments: [
-    {pins: "*", layers: ["met2"], side: "bottom"}, # Default to bottom
-    {pins: "p_sdi_*", layers: ["met2"], side: "left"}, # Inputs
-    {pins: "p_sdo_*", layers: ["met2"], side: "right"}, # Outputs
-  ]
+#  pin.assignments: [
+#    {pins: "*", layers: ["met2"], side: "bottom"}, # Default to bottom
+#    {pins: "p_sdi_*", layers: ["met2"], side: "left"}, # Inputs
+#    {pins: "p_sdo_*", layers: ["met2"], side: "right"}, # Outputs
+#  ]
 
 # Placement Constraints
 vlsi.inputs.placement_constraints:
   - path: "TOP" # (this name isn't actually checked...)
     type: toplevel
     # Define chip dimensions
-    width:  1250
-    height: 1250
+    width:  1500
+    height: 1500
     x: 0
     y: 0
     margins: {left: 0, right: 0, top: 0, bottom: 0}

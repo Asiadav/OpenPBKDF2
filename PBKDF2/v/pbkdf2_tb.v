@@ -77,19 +77,17 @@ module pbkdf2_tb;
 	 .clk_i(clk)
 	,.rst_i(reset)
 
-	,.salt_len_i(tr_data_lo[1061:1056])
 	,.iters_i(tr_data_lo[1055:1024])
-
 	,.pass_i(tr_data_lo[1023:512])
 	,.salt_i(tr_data_lo[511:0])
+	,.salt_len_i(tr_data_lo[1061:1056])
 
+	,.in_ready(dut_ready_lo)
+	,.in_valid(tr_v_lo)
+	,.out_ready(dut_yumi_li)
+	,.out_valid(dut_v_lo)
 
 	,.hash_o(dut_data_lo[255:0])
-
-	,.in_valid(tr_v_lo)
-	,.in_ready(dut_ready_lo)
-	,.out_valid(dut_v_lo)
-	,.out_ready(dut_yumi_li)
 	);
 
   
@@ -97,7 +95,5 @@ module pbkdf2_tb;
   always_ff @(negedge clk) begin
     dut_yumi_li <= tr_ready_lo & dut_v_lo;
   end
-
-  initial #10000000ns $finish;
 
 endmodule

@@ -84,8 +84,6 @@ module pbkdf2(
     end
 
     always @(posedge clk_i) begin
-	$display("clock");
-
 	if (rst_i) begin
 	    ps <= 0;
 	    count <= 0;

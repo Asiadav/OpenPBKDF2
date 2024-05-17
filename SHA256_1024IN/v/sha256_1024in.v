@@ -17,14 +17,14 @@ module sha256_1024in (
   );
   
     logic new_hash, in_v, in_r, out_v, out_r;
-    logic [2:0] ps, ns;
-    logic [1023:0] in_reg;
+    logic [1:0] ps, ns;
+    logic [511:0] in_reg;
 
     sha256 hasher (.clk_i,
 		   .rst_i, 
 		   .new_hash, 
 		   .in_valid(in_v),
-		   .in(ps == 1 ? in_reg[1023:512] : in_reg[511:0]),
+		   .in(ps == 0 ? in[1023:512] : in_reg),
    		   .in_ready(in_r), 
 		   .out_valid(out_v), 
 		   .out,
@@ -33,42 +33,34 @@ module sha256_1024in (
     always @(*) begin
     ns = ps; in_ready = 0; out_valid = 0; in_v = 0; out_r = 0; new_hash = 0;
     case (ps)
-	0: begin  // Read Input
-	    if (in_valid) ns = 1; // new data recieved
-	end
-	1: begin  // Load First Chunk Into SHA256
-	    if (in_r) ns = 2;
-	    in_v = 1;
+	0: begin  // Load First Chunk Into SHA256
+	    if (in_r & in_valid) ns = 1;
+	    in_v = in_valid;
 	    in_ready = 1;
 	    new_hash = 1;
+	    out_r = 1;
+	    $display("sha in: %h", in);
 	end
-	2: begin  // Wait for hash
-	    if (out_v) ns = 3;
+	1: begin  // Load Second Chunk Into SHA256
+	    if (out_v) begin out_r = 1; ns = 2; end
 	end
-	3: begin  // Load Second Chunk Into SHA256
-	    if (in_r) ns = 4;
+	2: begin  // Output Result
+	    if (out_ready) begin ns = 0; out_r = 1; end
 	    in_v = 1;
-	    out_r = 1;
+	    out_valid = out_v;
 	end
-        4: begin  // Wait for hash (again)
-	    if (out_v) ns = 5;
-	end
-	5: begin  // Output Result
-	    if (out_ready) ns = 0;
-	    out_valid = 1;
-	    out_r = 1;
-	end
-	default:  begin end// unused
+	default: begin end
     endcase
     end
 
     always @(posedge clk_i) begin
+
         if (rst_i) begin
             ps <= 0;
 	    in_reg <= 0;
         end else begin
             ps <= ns;
-            if (ns == 1) in_reg <= in;
+            if (in_r & in_valid) in_reg <= in[511:0];
         end
     end
 endmodule

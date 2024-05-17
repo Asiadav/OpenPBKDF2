@@ -21,84 +21,49 @@ module hmac_sha256 (
   
     logic new_hash, in_valid, in_ready, out_valid, out_ready, sel;
     logic [2:0] ps, ns;
-    logic [255:0] out;
     logic [439:0] one;
     logic [511:0] pad, key_reg;
     logic [1023:0] in, in_1, in_2;
 
-    sha256_1024in hasher (.clk_i, .rst_i, .in_valid, .in, .in_ready, .out_valid, .out, .out_ready);
+    sha256_1024in hasher (.clk_i, .rst_i, .in_valid, .in, .in_ready, .out_valid, .out(prf_o), .out_ready);
 
     always @(*) begin
-    ns = ps; r_o = 0; out_ready = 0; in_valid = 0; v_o = 0;
+    ns = ps; r_o = 0; out_ready = out_valid; in_valid = 0; v_o = 0;
     case (ps)
-	0: begin  // Read Input
-	    if (v_i) ns = 1; // new data recieved
-	end
-	1: begin  // Load Into Reg
-	    if (in_ready) ns = 2;
+	0: begin  // Load Into Reg
+	    if (in_ready & v_i) ns = 1;
 	    r_o = 1;
-	    in_valid = 1;
+	    in_valid = v_i;
 	end
-	2: begin  // Wait for hash
-	    if (out_valid) begin ns = 3; out_ready = 1; end
+	1: begin  // Load into Reg
+	    if (out_valid) ns = 2;
+	    in_valid = in_ready;
 	end
-	3: begin  // Load into Reg
-	    if (in_ready) ns = 4;
-	    in_valid = 1;
-	end
-        4: begin  // Wait for hash (again)
-	    if (out_valid) begin ns = 5; out_ready = 1; end
-	end
-	5: begin  // Output Result
+	2: begin  // Output Result
 	    if (r_i) ns = 0;
-	    out_ready = 1;
-	    v_o = 1;
+	    in_valid = 1;
+	    v_o = out_valid;
 	end
 	default:  begin end// unused
     endcase
     end
 
-    oneSetter2 setter (.len(msg_len_i), .one);
+    oneSetter setter (.len(msg_len_i), .one);
     assign in_1 = {{64{8'h36}} ^ key_i, msg_i} | {1'b1, msg_len_i, 3'b000} | {one, 64'b0};
-    assign in_2 = {{64{8'h5c}} ^ key_reg, out, 1'b1, 191'b0, 64'd768};
+    assign in_2 = {{64{8'h5c}} ^ key_reg, prf_o, 1'b1, 191'b0, 64'd768};
+    assign in = v_i ? in_1 : in_2;
 
     always @(posedge clk_i) begin
         if (rst_i) begin
             ps <= 0;
-            in <= 0;
-            //prf_o <= 0;
         end else begin
             ps <= ns;
-            if (ns == 3'b001) begin in <= in_1; key_reg <= key_i; end // update the sha256 input register
-            if (ns == 3'b011) in <= in_2; // update the sha256 input register
-            if (ns == 3'b101) prf_o <= out; // update the output register
+            if (v_i) key_reg <= key_i; // hold for second hash
         end
     end
 endmodule
 
-
-module oneSetter(
-    input [5:0] len,
-    output logic [439:0] one
-);
-
-
-// Define a lookup table with 64 entries (6-bit inputNumber)
-reg [439:0] lut [63:0];
-
-// Initialize the lookup table
-initial begin
-    for (int i = 8; i < 440; i+=8) begin
-        lut[i] = 8'b10000000 << (440 - i);
-	$display("%b", lut[i]);
-    end
-end
-
-assign result = lut[len];
-
-endmodule
-
-module oneSetter2(    input [5:0] len,
+module oneSetter(    input [5:0] len,
     output logic [439:0] one
 );
 always @(*) begin
