@@ -27,13 +27,13 @@ Final Presentation
 ![alt text](https://cdn.discordapp.com/attachments/1199124288377192479/1237563761603248148/image.png?ex=665872d1&is=66572151&hm=e3cfed2839a8dbc1e66aa7a5ef069df036713428208fd2e69aaf13113f447de5&)
 
 ### KDA MODULE
-![alt text](https://cdn.discordapp.com/attachments/1199124288377192479/1237563761603248148/image.png?ex=665872d1&is=66572151&hm=e3cfed2839a8dbc1e66aa7a5ef069df036713428208fd2e69aaf13113f447de5&)
-
-### PBKDF2 CHUNK MODULE
 ![alt text](https://cdn.discordapp.com/attachments/1199124288377192479/1237563821933989951/image.png?ex=665872df&is=6657215f&hm=f4a22eb9a5f4ee0157b73033320a898036958554da33c934b15b19b25d1270c4&)
 
+### PBKDF2 CHUNK MODULE
+![alt text](https://cdn.discordapp.com/attachments/1199124288377192479/1245441903810576434/image.png?ex=6658c3a9&is=66577229&hm=550fd0ee29ccbbaca3e329ee812fa26f1a8cbefcd4c0a0223b94c998c2d8ef81&)
+
 ### HMAC_SHA256 MODULE
-![alt text](https://cdn.discordapp.com/attachments/1199124288377192479/1230275520214597672/image.png?ex=66584d1d&is=6656fb9d&hm=5ff12b8f6058da4e5e8a563d66db42c1184127b8714f3a8c5db0099c22ada4ed&)
+![alt text](https://cdn.discordapp.com/attachments/1199124288377192479/1245441997754470492/image.png?ex=6658c3bf&is=6657723f&hm=b2910716a91839d0dd65207827db1cc2998f29072699d6c97cf97fab8167f00c&)
 
 
 ## Limitations/Future Work 
